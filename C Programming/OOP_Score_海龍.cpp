@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <fstream>
 #include <iomanip>
 #include<math.h>
@@ -6,7 +6,7 @@ using namespace std;
 
 class Score {
 public:
-	double calSccore(){
+	double calSccore() {
 		ifstream fin("D:\\file_score.txt");
 		if (!fin) {
 			cout << "檔案無法開啟" << endl;
@@ -34,9 +34,9 @@ public:
 		int test[num];
 		for (int i = 0; i < num; i++) {
 			fin >> test[i];
-			cout << "No." <<  i +1 << ": "<< test[i] << endl;
+			cout << "No." << i + 1 << ": " << test[i] << endl;
 		}
-		
+
 	}
 };
 
@@ -74,7 +74,7 @@ int main()
 	avg = sc.calSccore();
 	cout << "平均成績為: " << avg << endl;
 	sc.printReport();
-	
+
 	cout << "--------------------" << endl;
 
 	float u, i, o;
@@ -87,12 +87,12 @@ int main()
 	}
 
 	Triangle tri;
-	
+
 	float a = tri.calculate(u, i, o);
 	float length = tri.getLength();
 	float width = tri.getWidth();
 	float height = tri.getHeight();
-	cout << "Length: " << length  << ","<< width << "," << height << '\n';
+	cout << "Length: " << length << "," << width << "," << height << '\n';
 	cout << "Triangle Perimeter: " << a << '\n';
 
 	float b = tri.calculate2(u, i, o);

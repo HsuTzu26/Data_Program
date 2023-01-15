@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 using namespace std;
 
 class Calculation {
@@ -12,7 +12,7 @@ public:
 		return a * b;
 	}
 	float volume(float a, float b, float c) {
-		cout << "The volume is: " << a * b  *c<< endl;
+		cout << "The volume is: " << a * b * c << endl;
 		return a * b * c;
 	}
 };

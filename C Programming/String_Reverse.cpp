@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 using namespace std;
 using std::string;
 
@@ -8,9 +8,9 @@ void swap(char* str1, char* str2) {
 	*str2 = tmp;
 }
 
-void reverse(char* first, char* last){
+void reverse(char* first, char* last) {
 	--last;
-	while(first < last){
+	while (first < last) {
 		swap(first, last);
 		++first;
 		--last;
@@ -20,7 +20,7 @@ void reverse(char* first, char* last){
 int main()
 {
 	char str[50];
-	cout << "請輸入字串"<< endl;
+	cout << "請輸入字串" << endl;
 	cin >> str;
 	int length = strlen(str);
 	reverse(&str[0], &str[length]);

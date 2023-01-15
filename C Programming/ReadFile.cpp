@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <stdlib.h>
 #include <fstream>
 #include <iomanip>
@@ -27,7 +27,7 @@ int main()
 	int test[num];
 	test[0] = 0;
 	int value = test[0];
-	for(int i = 0; i < num; i++){
+	for (int i = 0; i < num; i++) {
 		fin >> test[i];
 	}
 	for (int j = 0; j < num; j++) {
