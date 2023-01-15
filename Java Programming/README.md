@@ -1,1 +1,2 @@
-# 1102 JAVA程式語言入門 Introduction to JAVA Programming
+# 1102 Introduction to JAVA Programming
+# 1111 Object-Oriented Programming
