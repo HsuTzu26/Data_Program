@@ -1,0 +1,75 @@
+
+// ex1. 一般副函數以 swap 交換兩個數字 (無法交換)
+
+#include <iostream>
+using namespace std;
+void swap(int x, int y) {
+    int tmp;
+    tmp = x;
+    x = y;
+    y = tmp;
+}
+
+int main()
+{
+    int a = 5;
+    int b = 10;
+    cout << "變數 a 的值為" << a << "\n";
+    cout << "變數 b 的值為" << b << "\n";
+    cout << "變數 a 與 b 兩值進行交換" << "\n";
+    swap(a, b);
+    cout << "變數 a 的值為" << a << "\n";
+    cout << "變數 b 的值為" << b << "\n";
+    return 0;
+}
+=============================================================
+
+
+// ex2. 一般副函數以 swap(兩個數字的指標變數交換)
+#include <iostream>
+using namespace std;
+void swap(int* px, int* py) {
+    int tmp;
+    tmp = *px;
+    *px = *py; 
+    *py = tmp;
+}
+
+int main()
+{
+    int a = 5;
+    int b = 10;
+    cout << "變數 a 的值為" << a << "\n";
+    cout << "變數 b 的值為" << b << "\n";
+    cout << "變數 a 與 b 兩值進行交換" << "\n";
+    swap(&a, &b);
+    cout << "變數 a 的值為" << a << "\n";
+    cout << "變數 b 的值為" << b << "\n";
+    return 0;
+}
+=============================================================
+
+
+// ex3. 一般副函數以 swap(兩個數字的取址&交換)
+#include <iostream>
+using namespace std;
+void swap(int& px, int& py) {
+    int tmp;
+    tmp = px;
+    px = py; 
+    py = tmp;
+}
+
+int main()
+{
+    int a = 5;
+    int b = 10;
+    cout << "變數 a 的值為" << a << "\n";
+    cout << "變數 b 的值為" << b << "\n";
+    cout << "變數 a 與 b 兩值進行交換" << "\n";
+    swap(a, b);
+    cout << "變數 a 的值為" << a << "\n";
+    cout << "變數 b 的值為" << b << "\n";
+    return 0;
+}
+=============================================================

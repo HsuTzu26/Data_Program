@@ -1,0 +1,131 @@
+#include<iostream>
+using namespace std;
+
+void bubbleSort(int *p, int n) {
+    for (int i = 0; i < 5-1; i++) {
+        for (int j = 0; j < 5-i-1; j++) {
+            if (*(p + j) < *(p + j + 1)) {        小於(<) 由大到小, 大於(>) 由小到大
+                int tmp = *(p + j + 1);
+                *(p + j + 1) = *(p + j);
+                *(p + j) = tmp;
+            }
+        }
+    }
+}
+
+int main()
+{
+    int a[5] = { 10,15, 13, 20, 25 };
+    bubbleSort(a, 5);
+    for (int i = 0; i < 5; i++) {
+        cout << "a[" << i << "]=" << a[i] << "\n";
+    }
+    return 0;
+}
+------------------------------------------------------------------------
+// ex2. 一般副函數以 swap(兩個數字的指標變數交換)
+#include <iostream>
+using namespace std;
+void swap(int* px, int* py) {
+    int tmp;
+    tmp = *px;
+    *px = *py; 
+    *py = tmp;
+}
+
+int main()
+{
+    int a = 5;
+    int b = 10;
+    cout << "變數 a 的值為" << a << "\n";
+    cout << "變數 b 的值為" << b << "\n";
+    cout << "變數 a 與 b 兩值進行交換" << "\n";
+    swap(&a, &b);
+    cout << "變數 a 的值為" << a << "\n";
+    cout << "變數 b 的值為" << b << "\n";
+    return 0;
+}
+=============================================================
+
+
+// ex3. 一般副函數以 swap(兩個數字的取址&交換)
+#include <iostream>
+using namespace std;
+void swap(int& px, int& py) {
+    int tmp;
+    tmp = px;
+    px = py; 
+    py = tmp;
+}
+
+int main()
+{
+    int a = 5;
+    int b = 10;
+    cout << "變數 a 的值為" << a << "\n";
+    cout << "變數 b 的值為" << b << "\n";
+    cout << "變數 a 與 b 兩值進行交換" << "\n";
+    swap(a, b);
+    cout << "變數 a 的值為" << a << "\n";
+    cout << "變數 b 的值為" << b << "\n";
+    return 0;
+}
+=============================================================
+#include<iostream>
+using namespace std;
+
+class square_sum {
+private:
+    int array_size;
+public:
+    int cin_array(int size)
+    {
+        int a[5] = { 0 };
+        int square_sum = 0;
+        array_size = size;
+        cout << "請依序輸入五個數字" << "\n";
+        for (int i = 0; i < array_size; i++) {
+            cin >> a[i];
+            square_sum += a[i]*a[i];
+        }
+        return square_sum;
+    }
+};
+
+int main()
+{
+   square_sum sq;
+   int value;
+   value = sq.cin_array(5);
+   cout << "value = " << value << "\n";
+    return 0;
+}
+
+=============================================================
+類別程式：
+
+class polynomial {
+private: int a = 3, b = 2; int input;
+public:    
+    int getA() {return a;}
+    int getB() {return b;}    
+    int output(int input);
+};
+int polynomial::output(int input) {
+    return a * input + b;
+}
+單元測試程式：
+namespace UnitTest1
+{
+TEST_CLASS(UnitTest1)
+{
+  public:
+    TEST_METHOD(polynomial_fun)
+    {
+    polynomial polynomial_test1;
+    Assert::AreEqual(3, polynomial_test1.getA());
+    Assert::AreEqual(2, polynomial_test1.getB());
+    Assert::AreEqual(5, polynomial_test1.output(1));
+    }
+};
+}
