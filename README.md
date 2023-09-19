@@ -12,3 +12,9 @@
   - Object-Oriented Programming
   - Statistical Programming with R
   - Computer Software Integreted Application(Python)
+ 
+- 1112
+  -  Database Management System
+    
+- 1121
+  - Now
