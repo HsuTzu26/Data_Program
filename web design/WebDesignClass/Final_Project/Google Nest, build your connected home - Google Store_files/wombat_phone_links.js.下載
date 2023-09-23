@@ -1,0 +1,16 @@
+/**
+ * Converts elements with data-telephone attributes to anchors with `tel:` uris
+ * @param {!HTMLElement} scopeElement Active element passed from wombat router
+ */
+var WombatPhoneLinks = function(scopeElement) {
+  const init = () => {
+    const link = document.createElement('a');
+    const phoneNumber = scopeElement.innerHTML;
+    link.classList.add('id-no-nav');
+    link.href = `tel:${phoneNumber}`;
+    link.innerHTML = scopeElement.innerHTML;
+    scopeElement.parentNode.replaceChild(link, scopeElement);
+  };
+
+  init();
+};

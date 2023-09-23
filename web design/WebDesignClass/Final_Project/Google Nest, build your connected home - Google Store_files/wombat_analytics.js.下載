@@ -1,0 +1,110 @@
+/**
+ * @fileoverview Handles sending events to GTM
+ */
+
+/**
+ * @function WombatAnalyticsClickHandler
+ * @param {!HTMLElement} scopeElement
+ */
+function WombatAnalytics(scopeElement) {
+  var moduleType = scopeElement.getAttribute('data-module-type');
+  var sectionName = scopeElement.getAttribute('data-section-name');
+  var hasElementWatcher = scopeElement.hasAttribute('element-watcher');
+  var time;
+  var _this = this;
+
+  this.track = function (label, interactionType) {
+    var _interactionType = interactionType || 'click';
+    var _nonInteraction = Number(!['click', 'swipe', 'drag'].includes(interactionType));
+
+    dataLayer.push({
+      event: 'module interaction',
+      eventCategory: 'module ' + _interactionType,
+      eventAction: sectionName,
+      eventLabel: label,
+      nonInteraction: _nonInteraction,
+      moduleType: moduleType,
+      fallbackUsed: 'false',
+      pageType: 'pdp',
+      product: '(not set)',
+      moduleName: sectionName,
+      sectionName: sectionName,
+      pageName: window.location.pathname
+    });
+  };
+
+  function _trackClick(event) {
+    var label = event.target.getAttribute('data-track-label');
+    _this.track(label || "(not set)", 'click');
+  }
+
+  this.setClickTracking = scopeElement => {
+    scopeElement.querySelectorAll('[track-click]').forEach(function(element) {
+      element.addEventListener('click', _trackClick);
+    });
+  };
+
+  this.unsetClickTracking = scopeElement => {
+    scopeElement.querySelectorAll('[track-click]').forEach(function(element) {
+      element.removeEventListener('click', _trackClick);
+    });
+  };
+
+  function _trackInView () {
+    time = Date.now();
+    dataLayer.push({
+      event: 'module inview',
+      eventCategory: 'module inview',
+      eventAction: sectionName,
+      eventLabel: '(not set)',
+      nonInteraction: '1',
+      moduleType: moduleType,
+      fallbackUsed: 'false',
+      pageType: 'pdp',
+      product: '(not set)',
+      moduleName: sectionName,
+      sectionName: sectionName,
+      pageName: window.location.pathname
+    });
+  }
+
+  function _trackOutOfView () {
+    dataLayer.push({
+      event: 'module outview',
+      eventCategory: 'module outview',
+      eventAction: sectionName,
+      eventLabel: '(not set)',
+      nonInteraction: '1',
+      moduleType: moduleType,
+      fallbackUsed: 'false',
+      pageType: 'pdp',
+      product: '(not set)',
+      moduleName: sectionName,
+      sectionName: sectionName,
+      pageName: window.location.pathname,
+      secondsInview: String((Date.now() - time) / 1000)
+    });
+  }
+
+  function setInViewTracking () {
+    scopeElement.addEventListener('in-view', _trackInView);
+    scopeElement.addEventListener('out-of-view', _trackOutOfView);
+  }
+
+  function unsetInViewTracking () {
+    scopeElement.removeEventListener('in-view', _trackInView);
+    scopeElement.removeEventListener('out-of-view', _trackOutOfView);
+  }
+
+  this.init = function() {
+    this.setClickTracking(scopeElement);
+    if (hasElementWatcher) setInViewTracking();
+  };
+
+  this.destroy = function() {
+    this.unsetClickTracking(scopeElement);
+    if (hasElementWatcher) unsetInViewTracking();
+  };
+
+  this.init();
+}

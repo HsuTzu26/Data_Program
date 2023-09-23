@@ -1,0 +1,301 @@
+'use strict';
+
+/**
+ * Logic for hero/tease CRM and generic CRM
+ * @param {!HTMLElement} scopeElement is the element of scope that is passed
+ *     into this class
+ */
+var TemplateCRM = function(scopeElement) {
+  const moduleType = scopeElement.getAttribute('data-module-type');
+  const sectionName = scopeElement.getAttribute('data-section-name');
+  /**
+   * Elements within CRM module
+   */
+  const CRM_Element = {
+    CONFIRMATION_FIELDS: scopeElement.querySelectorAll('.confirmation-field'),
+    COPY_BLOCKS: scopeElement.querySelectorAll('.copy'),
+    DISMISS_BUTTON: scopeElement.querySelector('.dismiss'),
+    EMAIL_BUTTON: scopeElement.querySelector('.email'),
+    EMAIL_FIELD: scopeElement.querySelector('.email-field'),
+    EMAIL_INPUT: scopeElement.querySelector('.email-field input'),
+    FORM: scopeElement.querySelector('.subscribe-form'),
+    MQN_CONTAINER: scopeElement.closest('.mannequin'),
+    SUBSCRIBE_BUTTON: scopeElement.querySelector('.subscribe'),
+    SUBSCRIBED_CTA: scopeElement.querySelector('.subscribed-cta'),
+    SUCCESS_MESSAGE: scopeElement.querySelector('.success-message'),
+    TERMS_CONTAINERS:
+        scopeElement.querySelectorAll('.disclaimers-top, .disclaimers'),
+    DATA_CONTAINER: scopeElement.querySelector('.crm-content'),
+  };
+
+  /** @enum {string} */
+  const Attribute = {
+    REQUIRED: 'required',
+  };
+
+  /** @enum {string} */
+  const Param = {
+    CLICK: 'click',
+    SMOOTH: 'smooth',
+    SOURCE: 'source',
+    SUBMIT: 'submit',
+    TRUE: 'true',
+    Y_OFFSET: 'offsetY'
+  };
+
+  /** @enum {string} */
+  const ClassName = {
+    HIDDEN: 'hidden',
+  };
+
+
+  let previousState = null;
+  let currentState = null;
+
+  /** @enum {string} */
+  const State = {
+    SIGNED_IN: 'signed-in',
+    SIGNED_OUT: 'signed-out',
+    SUBSCRIBED: 'subscribed'
+  };
+
+  const Data = {
+    CONTENT: JSON.parse(CRM_Element.DATA_CONTAINER.content.textContent),
+    STATE: Object.values(State),
+  };
+
+  /** @enum {string} */
+  const Label = {
+    SUBSCRIBE: Data.CONTENT[State.SIGNED_IN].ctaLabel,
+    SUBSCRIBED: Data.CONTENT[State.SUBSCRIBED].ctaLabel,
+  };
+
+  /** @enum {string} */
+  const AriaLabel = {
+    SUBSCRIBE: Data.CONTENT[State.SIGNED_IN].ctaAriaLabel,
+    SUBSCRIBED: Data.CONTENT[State.SUBSCRIBED].ctaAriaLabel,
+  };
+
+  /**
+   * Waits for mannequinService to be available
+   */
+  const getMannequinService = new Promise(resolve => {
+    const interval = () => window.mannequinService ?
+        resolve(window.mannequinService) :
+        window.requestAnimationFrame(interval);
+    window.requestAnimationFrame(interval);
+  });
+
+  const isSignedIn =
+      CRM_Element.MQN_CONTAINER.classList.contains('is-signed-in');
+  const isSubscribed =
+      CRM_Element.MQN_CONTAINER.classList.contains('is-subscribed');
+
+
+  /**
+   * Toggle class on element based on a condition
+   * @param {!HTMLElement} element
+   * @param {string} className
+   * @param {boolean} condition
+   */
+  const toggleClass = (element, className, condition) => condition ?
+      element.classList.remove(className) :
+      element.classList.add(className);
+
+
+  /**
+   * Update UI based on state and do nothing if state has not changed.
+   */
+  const render = () => {
+    const stateData = Data.CONTENT[currentState];
+    const showEmailOption = !isSignedIn;
+
+    toggleClass(
+        CRM_Element.EMAIL_BUTTON.parentElement, ClassName.HIDDEN,
+        showEmailOption);
+
+    if (currentState !== previousState) {
+      scopeElement.classList.remove(...Data.STATE);
+      scopeElement.classList.add(currentState);
+
+      CRM_Element.COPY_BLOCKS.forEach(
+          block => toggleClass(
+              block, ClassName.HIDDEN, block.classList.contains(currentState)));
+
+      CRM_Element.TERMS_CONTAINERS.forEach(
+          container => toggleClass(
+              container, ClassName.HIDDEN, stateData.showDisclaimers));
+
+      if (currentState === State.SUBSCRIBED) {
+        CRM_Element.EMAIL_FIELD.classList.add(ClassName.HIDDEN);
+        CRM_Element.EMAIL_BUTTON.parentElement.classList.add(ClassName.HIDDEN);
+        CRM_Element.SUBSCRIBE_BUTTON.classList.remove('cta-shop');
+        CRM_Element.SUBSCRIBE_BUTTON.classList.add('cta-shop-dark');
+        CRM_Element.CONFIRMATION_FIELDS.forEach(
+            el => el.classList.add(ClassName.HIDDEN));
+        CRM_Element.SUBSCRIBE_BUTTON.disabled = true;
+        CRM_Element.SUBSCRIBE_BUTTON.textContent = Label.SUBSCRIBED;
+        CRM_Element.SUBSCRIBE_BUTTON.setAttribute(
+            'aria-label', AriaLabel.SUBSCRIBED);
+        CRM_Element.SUBSCRIBED_CTA &&
+            toggleClass(
+                CRM_Element.SUBSCRIBED_CTA, 'hidden',
+                !!CRM_Element.SUBSCRIBED_CTA);
+      }
+
+      toggleClass(CRM_Element.FORM, ClassName.HIDDEN, stateData.showForm);
+    }
+
+    previousState = currentState;
+  };
+
+
+  /**
+   * Dismiss section and store state in cookie
+   */
+  const dismissSection = () => {
+    scopeElement.classList.add('dismissed');
+    sessionStorage.crmDismissed = true;
+  };
+
+
+  /**
+   * Show email field
+   */
+  const showEmailField = () => {
+    CRM_Element.EMAIL_FIELD.classList.remove(ClassName.HIDDEN);
+    CRM_Element.EMAIL_INPUT.setAttribute(Attribute.REQUIRED, Param.TRUE);
+    CRM_Element.EMAIL_BUTTON.parentElement.classList.add(ClassName.HIDDEN);
+    CRM_Element.SUBSCRIBE_BUTTON.textContent = Label.SUBSCRIBE;
+    CRM_Element.SUBSCRIBE_BUTTON.setAttribute(
+        'aria-label', AriaLabel.SUBSCRIBE);
+  };
+
+
+  const setupEvents = () => {
+    CRM_Element.FORM.addEventListener(Param.SUBMIT, subscribeUser);
+    CRM_Element.EMAIL_BUTTON.addEventListener(Param.CLICK, showEmailField);
+    CRM_Element.DISMISS_BUTTON &&
+        CRM_Element.DISMISS_BUTTON.addEventListener(
+            Param.CLICK, dismissSection);
+  };
+
+
+  /**
+   * Save source and page y location in session and redirect to login
+   */
+  const signInAndSubscribe = () => {
+    sessionStorage.setItem(Param.SOURCE, CRM_Element.FORM.source.value);
+    sessionStorage.setItem(Param.Y_OFFSET, window.pageYOffset);
+
+    dataLayer.push({
+      event: 'signInAndSubscribe',
+      eventCategory: 'crm',
+      eventAction: 'sign in and auto subscribe',
+      eventLabel: CRM_Element.FORM.source.value || '(not set)',
+      nonInteraction: 'true',
+      moduleType: moduleType,
+      fallbackUsed: 'false',
+      pageType: 'pdp',
+      // products: '(not set)',
+      moduleName: sectionName,
+      sectionName: sectionName,
+      pageName: window.location.pathname
+    });
+
+    getMannequinService.then(
+        mannequinService => mannequinService.redirectToLogin());
+  };
+
+
+  /**
+   * If logged in subscribe user otherwise redirect to Gaia to auto subscribe.
+   * Otherwise toggle HTML5 form validation
+   */
+  const subscribeUser = event => {
+    event && event.preventDefault();
+    const sourceFromStorage = sessionStorage.getItem(Param.SOURCE);
+    sessionStorage.removeItem(Param.SOURCE);
+    sessionStorage.removeItem(Param.Y_OFFSET);
+
+    const form = CRM_Element.FORM;
+    const email = form.email.value;
+    const source = sourceFromStorage || form.source.value;
+
+    if (currentState === State.SIGNED_OUT && !email) {
+      signInAndSubscribe();
+    } else if (sourceFromStorage || form.checkValidity()) {
+      currentState = State.SUBSCRIBED;
+      render();
+
+      dataLayer.push({
+        event: 'email signup',
+        eventCategory: 'crm',
+        eventAction: 'email signup',
+        eventLabel: source || '(not set)',
+        nonInteraction: 'true',
+        moduleType: moduleType,
+        fallbackUsed: 'false',
+        pageType: 'pdp',
+        // products: '(not set)',
+        moduleName: sectionName,
+        sectionName: sectionName,
+        pageName: window.location.pathname
+      });
+
+      getMannequinService.then(
+          mannequinService => mannequinService.subscribeUser(source, email));
+    } else {
+      form.reportValidity();
+    }
+  };
+
+
+  /**
+   * Detect Gaia redirect and auto subscribe and scroll to previous position
+   */
+  const detectRedirect = () => {
+    const source = sessionStorage.getItem(Param.SOURCE);
+    const pageYOffset = sessionStorage.getItem(Param.Y_OFFSET);
+
+    if (source && pageYOffset) {
+      window.scrollTo({top: pageYOffset, behavior: Param.SMOOTH});
+      subscribeUser();
+    }
+  };
+
+
+  /**
+   * Check and set state based on logged in and subscription status
+   */
+  const setCurrentState = () => {
+    if (isSignedIn && isSubscribed) {
+      currentState = State.SUBSCRIBED;
+    } else if (isSignedIn) {
+      currentState = State.SIGNED_IN;
+    } else {
+      currentState = State.SIGNED_OUT;
+    }
+  };
+
+
+  this.init = function() {
+    sessionStorage.crmDismissed && dismissSection();
+    setCurrentState();
+    detectRedirect();
+    render();
+    setupEvents();
+  };
+
+
+  this.destroy = function() {
+    CRM_Element.FORM.removeEventListener(Param.SUBMIT, subscribeUser);
+    CRM_Element.EMAIL_BUTTON.removeEventListener(Param.CLICK, showEmailField);
+    CRM_Element.DISMISS_BUTTON &&
+        CRM_Element.DISMISS_BUTTON.removeEventListener(
+            Param.CLICK, dismissSection);
+
+  };
+
+  this.init();
+};

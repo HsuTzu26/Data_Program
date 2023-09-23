@@ -1,0 +1,85 @@
+/**
+ * @fileoverview Description of this file.
+ */
+
+/**
+ * @function WombatTouchWatcher Class that triggers events for user swipe movements
+ * @param {!HTMLElement} scopeElement the element that the touch watcher is attached to
+ */
+function WombatTouchWatcher(scopeElement) {
+  var touchStartPosition = [];
+  var touchEndPosition = [];
+  var touchMovePositions = [];
+
+  var dispatchEvents = {
+    swipeLeft: new Event('swipe-left'),
+    swipeRight: new Event('swipe-right'),
+    swipeUp: new Event('swipe-up'),
+    swipeDown: new Event('swipe-down'),
+  };
+
+  function analyzeTouch() {
+    var leftRight = touchEndPosition[0] - touchStartPosition[0];
+    var upDown = touchEndPosition[1] - touchStartPosition[1];
+
+    if (Math.abs(upDown) > Math.abs(leftRight)) {
+      if (upDown > 10) {
+        scopeElement.dispatchEvent(dispatchEvents.swipeDown);
+      } else if (upDown < 10) {
+        scopeElement.dispatchEvent(dispatchEvents.swipeUp);
+      } else {
+        // no movement.
+        // console.log('no movement');
+      }
+    } else {
+      if (leftRight > 10) {
+        scopeElement.dispatchEvent(dispatchEvents.swipeRight);
+      } else if (leftRight < 10) {
+        scopeElement.dispatchEvent(dispatchEvents.swipeLeft);
+      } else {
+        // no movement.
+        // console.log('no movement');
+      }
+    }
+  }
+
+  function touchStart(evt) {
+    var touches = evt.changedTouches[0];
+    touchStartPosition = [touches.pageX, touches.pageY];
+    touchEndPosition = [];
+    touchMovePositions = [];
+    // console.log('function touchStart', touchStartPosition);
+  }
+
+  function touchMove(evt) {
+    var touches = evt.changedTouches[0];
+    // console.log(evt.changedTouches.length);
+    touchMovePositions.push([touches.pageX, touches.pageY]);
+    // console.log('function touchMove', touchMovePositions);
+  }
+
+  function touchEnd(evt) {
+    var touches = evt.changedTouches[0];
+    touchEndPosition = [touches.pageX, touches.pageY];
+    // console.log('function touchEnd', touchEndPosition);
+    analyzeTouch();
+  }
+
+  function setupEventListeners() {
+    scopeElement.addEventListener('touchstart', touchStart);
+    scopeElement.addEventListener('touchmove', touchMove);
+    scopeElement.addEventListener('touchend', touchEnd);
+  }
+
+  function init() {
+    setupEventListeners();
+  }
+
+  init();
+
+  this.destroy = function() {
+    scopeElement.removeEventListener('touchstart', touchStart);
+    scopeElement.removeEventListener('touchmove', touchMove);
+    scopeElement.removeEventListener('touchend', touchEnd);
+  };
+}

@@ -1,0 +1,17 @@
+/**
+ * @fileoverview JavaScript type prototype overrides and expansions.
+ */
+
+/**
+ * "foo %@2 %@1".fmt('qux', 'bar') => "foo bar qux"
+ *
+ * @function fmt adds the format function to the String prototype.
+ * @return {string} formatted string
+ */
+String.prototype.fmt = function() {
+  var str = this;
+  for(var i = 1; i <= arguments.length; i++) {
+    str = str.replace(new RegExp("%@" + i, "g"), arguments[i-1]);
+  }
+  return str;
+};

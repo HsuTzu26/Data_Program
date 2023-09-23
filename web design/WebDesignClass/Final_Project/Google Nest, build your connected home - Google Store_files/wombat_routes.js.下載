@@ -1,0 +1,78 @@
+"use strict";
+
+/**
+ * @fileoverview This file handles mapping used for the router.js file. Each query selector corresponds to a ClassName that is bound to the window.
+ */
+
+window.wombatRoutes = {
+  '[template-modalizer]': ['TemplateModalizer'],
+  '[wombat-template] [data-telephone]': ['WombatPhoneLinks'],
+  '[wombat-template] [format-anchors]': ['WombatFormatAnchors'],
+  '[wombat-template] [lazy-load], [wombat-template][lazy-load]':
+      ['WombatLazyLoad'],
+  '[wombat-template] .async-cta': ['WombatAsyncCtaHandler'],
+  '[wombat-template].accordion-module': ['WombatAccordionModule'],
+  '[wombat-template][element-watcher], .gs-modal[element-watcher]':
+      ['WombatElementWatcherDefaults'],
+  '[wombat-template] [data-gsi-modal-trigger]': ['WombatModalRouter'],
+  '[wombat-template][text-animations]': ['WombatTextAnimations'],
+  '[wombat-template][data-module-type], .gs-modal[data-module-type]':
+      ['WombatAnalytics'],
+  '[wombat-template].wombat_hero_with_background_video':
+      ['WombatHeroWithBackgroundVideo'],
+  '[wombat-template].wombat_hero_with_background_image':
+      ['WombatHeroWithBackgroundImage'],
+  '[wombat-template].wombat_gallery_color_picker': ['WombatGalleryColorPicker'],
+  '[wombat-template].wombat_tab_gallery': ['WombatTabGallery'],
+  '[wombat-template].wombat_timeline_gallery': ['WombatTimelineGallery'],
+  '[wombat-template].wombat_tabbed_gallery_right':
+      ['WombatTabbedGalleryLeftRight'],
+  '[wombat-template].wombat_50_50_img_right_gallery':
+      ['Wombat5050ImgRightGallery'],
+  '[wombat-template].wombat_50_50_img_left_assistant_speech_bubble_animated':
+      ['Wombat5050ImgLeftAssistantSpeechBubbleAnimated'],
+  '[wombat-template].wombat_thermostat_e_hero_clouds_animated':
+      ['WombatThermostatEHeroCloudsAnimated'],
+  '[wombat-template].wombat_tabbed_gallery_left':
+      ['WombatTabbedGalleryLeftRight'],
+  '[wombat-template].wombat_50_50_flexible_product_feature video':
+      ['WombatVideoPlayer'],
+  '[wombat-template].wombat_multi_column_feature_list':
+      ['WombatMultiColumnFeatureList'],
+  '[wombat-template] .wombat_side_scroll_scope': ['WombatSideScroller'],
+  '[wombat-template].wombat_learning_thermostat_timeline_gallery':
+      ['WombatLearningThermostatTimelineGallery'],
+  '[wombat-template].wombat_hero_with_image_or_video_left_or_right_copy video':
+      ['WombatVideoPlayer'],
+  '[wombat-template].wombat_video_player video': ['WombatVideoPlayer'],
+  '[wombat-template].wombat_pdp_bar_promo': ['WombatPdpBarPromo'],
+  '[wombat-template].wombat_comparison_cards_long_cameras':
+      ['WombatComparisonCardsLong'],
+  '[wombat-template].wombat_comparison_header': ['WombatComparisonHeader'],
+  '[wombat-template].wombat_zip_checker': ['WombatZipChecker'],
+  '[wombat-template].wombat_comparison_cards_long_thermostats':
+      ['WombatComparisonCardsLong'],
+  '[wombat-template].wombat_two_cards_up': ['WombatTwoCardsUp'],
+  '[wombat-template].wombat_generic_details_bar': ['WombatGenericDetailsBar'],
+  '[wombat-template].wombat_geo_promo_banner': ['WombatGeoPromoBanner'],
+  '[wombat-template].wombat_mpc': ['WombatMpc'],
+  '[wombat-template].wombat_crm_hero': ['WombatCrmHero'],
+  '[wombat-template].wombat_speedtest': ['WombatSpeedtest'],
+  '[wombat-template].wombat_50_50_g1': ['Wombat5050G1'],
+  '[wombat-template].wombat_promo_touts': ['WombatPromoTouts'],
+  '[wombat-template].wombat_promo_hero_pdp': ['WombatPromoTouts'],
+  '[wombat-template].wombat_product_image_gallery':
+      ['WombatProductImageGallery'],
+  '[wombat-template].wombat_accessories_wall': ['WombatAccessoriesWall'],
+  '[wombat-template].wombat_special_offers': ['WombatSpecialOffers'],
+  '[wombat-template].template_product_wall': ['TemplateProductWall'],
+  '[wombat-template].custom_video_page': ['CustomVideoPages'],
+  '[wombat-template].template_crm': ['TemplateCRM'],
+  '[wombat-template].template_rebates_banner': ['TemplateRebatesBanner'],
+  '[wombat-template].template_rebates_zip_checker':
+      ['TemplateRebatesZipChecker'],
+  '[wombat-template].wombat_tech_specs_single_list':
+      ['WombatTechSpecsSingleList'],
+  '[wombat-template].template_ratings_and_reviews_display':
+      ['TemplateRatingsAndReviewsDisplay'],
+};

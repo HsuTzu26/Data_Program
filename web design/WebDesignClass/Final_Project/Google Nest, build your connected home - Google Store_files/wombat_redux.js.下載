@@ -1,0 +1,25 @@
+/**
+ * Redux that manages state of accessories wall data
+ * @param {!Function} reducer runs when state changes
+ * @param {!Object=} initialState for store
+ * @return {!Object} Object of functions that manage state
+ */
+window.wombatReduxStore = function(reducer, initialState = {}) {
+  let listeners = new Set();
+  let state = reducer(initialState, {});
+
+  return {
+    getState: () => state,
+    dispatch: (action, value) => {
+      state = reducer(state, action, value);
+      listeners.forEach(listener => listener(state));
+    },
+    subscribe: (newListener) => {
+      listeners.add(newListener);
+
+      const unsubscribe = () => listeners.delete(newListener);
+
+      return unsubscribe;
+    },
+  };
+};

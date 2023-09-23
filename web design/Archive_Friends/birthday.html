@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <style>
+        /* 預設隱藏文字 */
+        .animated-text {
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+        
+        /* 顯示文字 */
+        .animated-text.show {
+            opacity: 1;
+        }
+    </style>
+
+    <meta charset="UTF-8" />
+    <title>❤❤❤賴芊孜生日快樂❤❤❤</title>
+    <link href="./birthday.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="static/css/style.css" />
+
+    <script>
+        function showGif() {
+            var gifContainer = document.getElementById('gifContainer');
+            gifContainer.innerHTML = '<img src="https://bestanimations.com/media/birthday/1935361197cute-happy-birthday-gif-husky-dog-animated.gif" alt="GIF">';
+        }
+
+        function animateText() {
+            var text = document.getElementById('text');
+            text.style.display = 'block'; // 顯示文字
+            text.innerHTML = ''; // 清空文本容器
+            
+            var content = text.dataset.content;
+            var lines = content.split('<br>'); // 根据<br>标签分割内容
+            
+            lines.forEach(function(line, index) {
+                if (index > 0) {
+                    var lineBreak = document.createElement('br');
+                    text.appendChild(lineBreak);
+                }
+            // var characters = text.innerText.split('');
+            // var characters = text.dataset.content.split('');
+            // var counter = 0;
+            
+            // var interval = setInterval(function() {
+            //     if (counter >= characters.length) {
+            //         clearInterval(interval);
+            //         return;
+            //     }
+                
+            //     var char = characters[counter];
+                var span = document.createElement('span');
+                // span.innerText = char;
+                span.innerHTML = line;
+                span.classList.add('animated-text');
+                text.appendChild(span);
+                
+            //     setTimeout(function() {
+            //         span.classList.add('show');
+            //     }, 100 * counter); // 延遲時間可調整
+                
+            //     counter++;
+            // }, 100);
+                setTimeout(function() {
+                    span.classList.add('show');
+                }, 1000 * index); // 延遲時間可調整
+            });
+        }
+    </script>
+
+  </head>
+
+  <body>
+    <h2 data-splitting>賴芊孜 生日大快樂 <br> Happy Birthday ❤❤❤ <br> 🎂</h2>
+    <button onclick="showGif()">按這裡按這裡！</button>
+    <div id="gifContainer"></div>
+    <button onclick="animateText()">點我點我！</button>
+    <div id="text" style="display: none; text-align: center;" 
+    data-content="❤❤❤賴芊孜生日快樂❤❤❤<br>這是給妳的小驚喜哈哈哈<br>時間過得真快，我們認識快10年了<br>
+    看到妳健康快樂我就放心了<br>記得多休息多喝水，不要把自己搞得太累了！<br>最重要的是我一直都在，可以放心吵我，再忙都挪出時間哈哈哈
+    <br>希望你天天開心 身體健康 平平安安的！<br>永遠都在的徐資軒 筆">
+    </div>
+  </body>
+</html>

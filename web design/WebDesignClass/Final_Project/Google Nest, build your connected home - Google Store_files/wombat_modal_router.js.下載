@@ -1,0 +1,61 @@
+/**
+ * @fileoverview Creates a router for the wombat modals. Will likely need to be expanded for localization
+ */
+
+/**
+ * @function WombatModalRouter handles the routing of wombat modals
+ * @param {!HTMLElement} triggerElement is required and provides the trigger value;
+ */
+function WombatModalRouter(triggerElement) {
+  var triggerID = '';
+
+  function getTriggerID() {
+    try {
+      triggerID = triggerElement.dataset.gsiModalTrigger;
+    } catch (e) {
+      console.error('Modal Trigger ID does not exist');
+    }
+
+    return triggerID;
+  }
+
+  function getModalURL() {
+    var triggerID = getTriggerID();
+    var modalURL = '';
+
+    try {
+      modalURL = window.wombatModalRoutes[triggerID];
+    } catch (e) {
+      console.error('Modal Route URL does not exist for "' + triggerID + '"');
+    }
+
+    return modalURL;
+  }
+
+  function convertHTML() {
+    var modalURL = getModalURL();
+
+    triggerElement.dataset.gsiModalId = triggerID;
+
+    // only one is necessary
+    if (document.querySelectorAll('[data-gsi-modal="%@1"]'.fmt(triggerID))
+            .length > 0) {
+      return;
+    }
+
+    var domArray = [];
+    domArray.push('<div data-gsi-modal="%@1">'.fmt(triggerID));
+    domArray.push('<div class="%@1">'.fmt(triggerID));
+    domArray.push(
+        '<iframe data-src="%@1" frameborder="0" height="100%" width="100%" style="width: 100%; height: 100%; display: block; position: absolute; overflow: auto;"></iframe>'
+            .fmt(modalURL));
+    domArray.push('</div></div>');
+
+    var domHTML = domArray.join('');
+
+    triggerElement.innerHTML = triggerElement.innerHTML + domHTML;
+  }
+
+  convertHTML();
+
+}

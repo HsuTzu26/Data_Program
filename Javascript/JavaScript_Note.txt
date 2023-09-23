@@ -1,0 +1,229 @@
+document.write("<h1>Hello World!!</h1>"); //顯示於網頁上 print on the web
+
+// Basic calculater: 
+var num1 = prompt("Please enter first number");//prompt: 取得使用者輸入 Get the user entered value
+var num2 = prompt("Please enter second number");//預設為字串 default is String
+num1 = parseFloat(num1);
+num2 = parseFloat(num2);
+document.write(num1 + num2);
+
+// 陣列array
+var arr = [2, 3, 5, 6, "hah", true];
+document.write(arr);
+
+// function
+function add(num1, num2){
+    document.write(num1 + num2);
+    document.write("<br/>");
+    return 10
+}
+
+value = add(3,5)
+document.write(value);
+
+//物件 object (key by value)
+
+var person = {
+    name:"Hsu",
+    age:19,
+    is_male: true,
+    print_name:function(){
+        document.write(this.name);
+    }
+};
+person.print_name();
+
+var movie = {
+    title:"Fall or float",
+    maker:"air電影",
+    duration:111,
+    actors:[
+        {
+            name:"hhh",
+            age:28,
+            is_male:true
+        },
+        {
+            name:"sss",
+            age:24,
+            is_male:true
+        }
+    ]
+};
+
+document.write(movie.actors[0].name);
+
+//密碼檢驗程式
+
+var password = "a123";
+var input;
+var entry_count = 0;
+var entry_limit = 3;
+var out_of_limit = false;
+
+while(password != input && !out_of_limit) {
+    entry_count++;
+    if(entry_count <= entry_limit) {
+        input = prompt("Please enter the password");
+    }
+    else {
+        out_of_limit = true;
+    }
+}
+
+if(out_of_limit) {
+    alert("Out of the limit!!");
+}
+else {
+    alert("Entered Successfully!!");
+}
+
+var questions = [
+    {
+        prompt:"香蕉是什麼顏色?\n(a)紅色\n(b)綠色\n(c)黃色",
+        answer:"c"
+    },
+    {
+        prompt:"草莓是什麼顏色?\n(a)紅色\n(b)綠色\n(c)黃色",
+        answer:"a"
+    },
+    {
+        prompt:"1公尺等於幾公分?\n(a)1\n(b)10\n(c)100",
+        answer:"c"
+    }
+]
+var score = 0;
+for(var i=0; i< questions.length; i++) {
+    var input = prompt(questions[i].prompt);
+    if(input == questions[i].answer) {
+        score++;
+        alert("Bingo!!");
+    }
+    else {
+        alert("Wrong...");
+    }
+}
+
+var num = [
+    [1,2,3],
+    [4,5,6],
+    [7,8,9],
+    [0]
+];
+
+for(var i =0; i<num.length; i++){
+    for(var j=0; j<num[i].length; j++){
+        document.write(num[i][j]);
+    }
+    document.write("<br/>");
+}
+
+
+
+for(var i=0; i<4; i++) {
+    for(var j=0; j<3; j++) {
+        document.write("i:" + i + ",j:" + j);
+        document.write("<br/>")
+    }
+}
+
+let sum = 0;
+var arr = [1,2,3,4,5];
+
+arr.forEach(func);
+document.write(sum);
+
+function func(item){
+    sum += item;
+}
+
+class Phone {
+    constructor(number, year, is_waterproof){
+        this.number = number;
+        this.year = year;
+        this.is_waterproof = is_waterproof;
+    }
+    phone_age() {
+        return 2022 - this.year;
+    }
+}
+
+var phone1 = new Phone("123", 2020, false);
+document.write(phone1.number);
+
+
+Html:
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charst = "UTF-8"/>
+        <title>My Web</title>
+        <link rel = "stylesheet" href = "style.css">
+    </head>
+    <body>
+        
+        <h1 id="header">Web</h1>
+        <a id="link" href="https://google.com">GOOGLE</a>
+        <script type = "text/javascript" language = "javascript" src = "script.js" charset = "UTF-8"></script> <!--import-->
+        
+    </body>
+</html>
+
+javaScript:
+//如何取得html元素 How to get html elements
+document.write();
+window.document.write("hahah"); //window為一全域物件,代表整個瀏覽器
+window.prompt("Haha");
+var h1 = document.getElementById("header");
+console.log(h1); //除錯 Debug 並顯示於console端
+
+h1.innerText = "Changed Web name";
+h1.style.backgroundColor = "red";
+h1.style.color = "blue";
+
+var link = document.getElementById("link");
+console.log(link);
+link.href = "https://amazon.com";
+
+
+html:
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charst = "UTF-8"/>
+        <title>My Web</title>
+        <link rel = "stylesheet" href = "style.css">
+    </head>
+    <body>
+        <img id="img" src="hotpot1.jpg" width="300" height="200">
+        <button id="btn" onclick="handle_click(this)">Push ME</button>
+        <script type = "text/javascript" language = "javascript" src = "script.js" charset = "UTF-8"></script> <!--import-->
+        
+    </body>
+</html>
+
+javaScript:
+//event listener
+//First way
+function handle_click(element){
+    alert("叫你按你就按啊?");
+    element.innerText = "按屁啊!";
+    element.style.color = "red";
+}
+//Second way
+var btn = document.getElementById("btn");
+btn.addEventListener("click", function(){
+    alert("叫你按你就按啊?");
+    this.innerText = "按屁啊!";
+    this.style.color = "red";
+})
+
+var img = document.getElementById("img");
+img.addEventListener("mouseover", function(){
+    this.src = "hotpot2.jpg"
+})
+img.addEventListener("mouseout", function(){
+    this.src = "hotpot1.jpg"
+})
+
+

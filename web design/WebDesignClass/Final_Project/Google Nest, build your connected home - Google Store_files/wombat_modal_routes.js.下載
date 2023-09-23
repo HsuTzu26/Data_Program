@@ -1,0 +1,76 @@
+/**
+ * @fileoverview This file builds up the routes object for the wombat modal router. Key maps to modal URL destination.
+ */
+
+/**
+ * @function nestDotComURL returns the expected localized nest.com URL
+ * @return {string} localized nest.com URL.
+ */
+function nestDotComURL() {
+  var localeMap = {
+    'en': '/',
+    'en-US': '/',
+    'fr-FR': '/fr/',
+    'en-CA': '/ca/',
+    'fr-CA': '/ca/fr/',
+    'en-GB': '/uk/',
+    'en-IE': '/ie/',
+    'nl-NL': '/nl/',
+    'fr-BE': '/be/fr/',
+    'nl-BE': '/be/nl/',
+    'de-DE': '/de/',
+    'de-AT': '/at/',
+    'it-IT': '/it/',
+    'es-ES': '/es/',
+    'es-MX': '/mx/',
+    'en-AU': '/au/',
+    'en-NZ': '/nz/',
+    'en-SE': '/se/',
+    'en-FI': '/fi/',
+    'en-DK': '/dk/',
+    'en-NO': '/no/',
+    'fr-CH': '/ch/fr/',
+    'de-CH': '/ch/de/',
+    'en-AE': '/ae/',
+    'fr-LU': '/lu/'
+  };
+
+  var userContext = JSON.parse(window['_uc']);
+  var displayLanguage = userContext[0];
+  var country = userContext[1];
+  var language = displayLanguage.split('-')[0];
+  var locale = language.toLowerCase() + '-' + country.toUpperCase();
+
+  var hostname = "https://nest.com";
+  var localePath = localeMap[locale] || '/';
+
+  return hostname + localePath;
+}
+
+/**
+ * Returns root path for the country
+ * @return {string}
+ */
+function getRootPath() {
+  const userContext = JSON.parse(window['_uc']);
+  const country = userContext[1].toLowerCase();
+  return country === 'us' ? '/' : `/${country}/`;
+}
+
+/**
+ * Returns hl param value for the language
+ * @return {string}
+ */
+function getLangParam() {
+  const match = location.search.match(/hl=[a-z]+(?:-[a-z]+)?/i);
+  return match ? `?${match[0]}` : '';
+}
+
+window.wombatModalRoutes = {
+  'thermostat-compatibility-na':
+      getRootPath() + 'widget/compatibility/thermostat' + getLangParam(),
+  'thermostat-compatibility-eu':
+      getRootPath() + 'widget/compatibility/thermostat' + getLangParam(),
+  'doorbell-compatibility':
+      getRootPath() + 'widget/compatibility/doorbell' + getLangParam(),
+};

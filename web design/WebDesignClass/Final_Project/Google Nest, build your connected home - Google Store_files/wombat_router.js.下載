@@ -1,0 +1,79 @@
+'use strict';
+
+/**
+ * @fileoverview This file handles execution and destruction of Classes bound to
+ * the window based on query selectors defined in wombat-routes.js
+ */
+
+var initializedClasses = [];
+let modalHandler;
+
+/**
+ * Handles initialization of Classes that are bound to query selectors.
+ * @function initializeRoutes
+ */
+function initializeRoutes() {
+  modalHandler = new window.ModalHandler();
+  Object.keys(window.wombatRoutes).forEach(function(routeQuery) {
+    var classNames = window.wombatRoutes[routeQuery];
+    var elements = document.querySelectorAll(routeQuery);
+    elements.forEach(function(element) {
+      classNames.forEach(function(className) {
+        try {
+          var instanceOfClass = new window[className](element);
+          initializedClasses.push(instanceOfClass);
+        } catch (e) {
+          console.error(
+              'There was an error initializing ' + className + ' for element ' +
+              element.outerHTML.replace(element.innerHTML, ''));
+          console.error(e);
+        }
+      });
+    });
+  });
+
+
+  /**
+   * Activate optimize after initialization to make sure optimize gets
+   * fired after DOM elements are initialized.
+   */
+  dataLayer.push({'event': 'optimize.activate'});
+}
+
+/**
+ * Takes the currently running classes on the page, and run the teardown
+ * "destroy" method on each of them.
+ * @function destroyRunningClasses
+ */
+function destroyRunningClasses() {
+  modalHandler.destroy();
+  while (initializedClasses.length) {
+    try {
+      var instanceOfClass = initializedClasses[0];
+      if (instanceOfClass.destroy) {
+        instanceOfClass.destroy();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      initializedClasses.splice(0, 1);
+    }
+  }
+}
+
+/**
+ * @function this function watches for the Smith DOM events to initialize or
+ * destroy classes.
+ */
+function initializeRouteWatcher() {
+  window.isRouteWatcherInitialized = true;
+
+  document.addEventListener(
+      'mannequinImpendingNavigation', destroyRunningClasses);
+
+  document.addEventListener('DOMContentLoaded', initializeRoutes);
+}
+
+if (!window.isRouteWatcherInitialized) {
+  initializeRouteWatcher();
+}

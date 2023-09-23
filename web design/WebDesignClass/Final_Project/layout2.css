@@ -1,0 +1,243 @@
+body {
+    margin:0px;
+    padding:0px;
+    color:#333;
+    font-family:"微軟正黑體";
+    font-size:1em;
+    line-height:1.5em;
+    background-color: #ede4bb;
+    background-image: url(images/body.png);
+    background-position: top;
+    background-repeat: repeat-x;
+    }
+    #wrapper {
+    /* position: relative;
+    padding: 0 5px;
+    margin: 0 auto;
+    width: 980px; */
+    margin-bottom: 40px;
+    }
+
+    #header {
+        position: relative;
+        margin: 10px 0 35px;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    #title {
+        float: left;
+        margin-right: 20px;
+    }
+    /* #header {
+    height: 170px;
+    } */
+    /* #title {
+    float: left;
+    padding: 30px 20px 0 0px;
+    } */
+    /* #main {
+    clear: both;
+    padding: 0px 0px;
+    background: url(images/content.png) repeat-y;
+    } */
+
+    #sidebar_container {
+        float: left;
+        font-size: 1.em;
+        width: 180px;
+        height: 500px;
+        margin-left: 3%;
+        margin-right: 3%;
+    }
+    #sidebar {
+        background-color: #FFF8D7;
+        border-right: 1px solid #eee;
+        padding-right: 15px;
+        width: 100%;
+        height: 100%;
+    }
+
+    #sidebar .head {
+        border-bottom: 1px solid #eee;
+        border-top: 1px solid #eee;
+        color: #888;
+    }
+
+
+    #footer_wrapper {
+        background-color:#fff;
+        line-height:20px;
+        font-size:13px;
+        text-align:center;
+        color:#666;
+        padding:15px 20px;
+    }
+
+    /* #sidebar {
+    float: left;
+    width: 200px;
+    height: 500px;
+    padding: 0 20px 210px 20px;
+    background-color: #FFF8D7;
+    } */
+
+    #main-container {
+        max-width: 720px;
+        margin: 0 10px 30px 400px;
+    }
+
+    #article {
+        display: block;
+    }
+
+    #article :first-child {
+        margin-top: 0;
+
+    }
+
+    /* #content {
+    float: right;
+    width: 650px;
+    padding-bottom: 40px;
+    } */
+    h1 {
+    font-size: 2em;
+    color: #000;
+    margin: 0 0 10px 0;
+    padding: 5px 0;
+    font-weight: normal;
+    }
+    p {
+    margin: 0px; padding: 0 0 10px 0; text-indent:2em; text-align:justify;
+    }
+    img {
+    border: none;
+    }
+    .image_wrapper {
+    padding: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+    }
+    .cleaner {
+    clear: both;
+    height: 0px;
+    }
+   
+
+    
+    .cup {
+    /* position: absolute; */
+    position: fixed;
+    bottom: 63px;
+    left: 33px;
+    width: 196px;
+    height: 347px;
+    /* background: url(images/beer.png) no-repeat;*/
+    }
+    .cup2 {
+    /* position: absolute; */
+    position: fixed;
+    bottom: -117px;
+    left: -3px;
+    width: 196px;
+    height: 347px;
+    /* background: url(images/cup.png) no-repeat; */
+    }
+    .meat {
+    position: fixed;
+    float: left;
+    bottom: -61px;
+    right: -7px;
+    width: 326px;
+    height: 218px;
+    z-index: 10;
+    background: url(images/meat1.png) no-repeat;
+    }
+    
+    h3 {
+    font-size: 21px;
+    color: #000; 
+    margin: 0 0 10px 0;
+    font-weight: normal;
+    }
+    .list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    
+    }
+    .list li a {
+    display: block;
+    margin-bottom: 5px;
+    padding: 3px 0 3px 20px;
+    background: url(images/list.png) left center no-repeat;
+    letter-spacing:0.1em;
+    }
+    a, a:link, a:visited {
+    color: #7c0d0b;
+    }
+    a:hover {
+    color: #996600;
+    
+    
+    }
+    
+    .float_l {
+    float: left;
+    width: 320px;
+    }
+    .float_r {
+    float: right;
+    width: 320px;
+    }
+    .button a {
+    clear: both;
+    display: block;
+    width: 92px;
+    height: 24px;
+    padding: 4px 0 0 0;
+    background: url(images/button.png) no-repeat;
+    color: #ccc;
+    font-size: 0.7em;
+    text-align: center;
+    text-decoration: none;
+    }
+    .button a:hover {
+    color: #fff;
+    font-size: 0.8em;
+    }
+    #menu {
+     float: right;
+    width: 650px;
+    height: 50px;
+    margin-top: 47px;
+    }
+    #menu ul {
+    float: right;
+    margin: 0;
+    padding: 10px;
+    list-style: none;
+    }
+    #menu ul li {
+    padding: 0px;
+    margin: 0px;
+    display: inline;
+    }
+    #menu ul li a {
+    float: left;
+    display: block;
+    padding: 3px 20px;
+    text-align: center;
+    font-size: 1em;
+    text-decoration: none;
+    color: #786c38;
+    /* background: url(images/menu_divider.png) repeat-y; */
+    letter-spacing:0.2em;
+    }
+    #menu ul li .first {
+    background: none;
+    }
+    #menu li a:hover, #menu li .first {
+    color: #2c2710;
+    }

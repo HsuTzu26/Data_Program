@@ -1,0 +1,8 @@
+/**
+ * @fileoverview Description of this file.
+ */
+
+window.wombatDefaults = {
+  galleryTransitionSpeed: 350,
+  galleryAutoAdvanceSpeed: 2500,
+};

@@ -1,0 +1,362 @@
+'use strict';
+
+/**
+ * Product Wall for static content (not data driven like Special Offers)
+ * @param {!Element} scopeElement
+ */
+var TemplateProductWall = function(scopeElement) {
+  const ProductWallElement = {
+    APPLY_BUTTON: scopeElement.querySelector('#apply'),
+    CATEGORY_CONTAINERS: scopeElement.querySelectorAll('[data-category]'),
+    CLEAR_BUTTON: scopeElement.querySelector('#clear'),
+    CONTAINER: scopeElement.querySelector('.container'),
+    COUNT: scopeElement.querySelector('#dropdown .count'),
+    DROPDOWN: scopeElement.querySelector('#dropdown'),
+    SHOW_MORE_BUTTON: scopeElement.querySelector('.show-more'),
+    FILTER_LIST: scopeElement.querySelector('#filter-menu'),
+    FILTERS_CONTAINER: scopeElement.querySelector('.filters'),
+    GORDON_FRAMES: document.querySelectorAll('.main-body-content'),
+    INPUTS: [...scopeElement.querySelectorAll('.filter-list input')],
+    NAVBAR: document.querySelector('.navbar'),
+    TOGGLABLE_LISTS: [...scopeElement.querySelectorAll('.expandable')],
+    TOGGLE_BUTTONS: [...scopeElement.querySelectorAll('[aria-controls]')],
+    VIEW_ALL: scopeElement.querySelector('[value=view_all]'),
+  };
+  const hasExperiment = scopeElement.classList.contains('experiment_variant');
+  const params = new URLSearchParams(location.search);
+  const filterNames =
+      ProductWallElement.INPUTS.filter(({value}) => value !== 'view_all')
+          .map(({value}) => value);
+  let categories = params.getAll('category');
+  const desktopMediaQuery = matchMedia('screen and (min-width: 768px)');
+  let observer;
+  let isSticky;
+  const getMannequinService = new Promise(resolve => {
+    const interval = () => window.mannequinService ?
+        resolve(window.mannequinService) :
+        window.requestAnimationFrame(interval);
+    window.requestAnimationFrame(interval);
+  });
+
+  /**
+   * Event handle for submenu click
+   * @param {!Event} event
+   */
+  const toggleMenu = event => {
+    event.stopPropagation();
+    toggleSubMenu(event.currentTarget);
+  };
+
+
+  /**
+   * Toggle class on element based on a condition
+   * @param {!HTMLElement} element
+   * @param {string} className
+   * @param {boolean} condition
+   */
+  const toggleClass = (element, className, condition) => condition ?
+      element.classList.add(className) :
+      element.classList.remove(className);
+
+
+  /**
+   * Move filter list for mobile vs desktop
+   * @param {!object} media
+   */
+  const setupFilterList = media => {
+    const container = media.matches ? ProductWallElement.FILTERS_CONTAINER :
+                                      ProductWallElement.DROPDOWN;
+    container.append(ProductWallElement.FILTER_LIST);
+    toggleClass(ProductWallElement.FILTER_LIST, 'expanded', media.matches);
+  };
+
+
+  /**
+   * Toggles sub menu list
+   * NOTE: Directly copied from Offers
+   * @param {!HTMLElement} button
+   */
+  const toggleSubMenu = button => {
+    const id = button.getAttribute('aria-controls');
+    const isStandAlone = button.dataset.standAlone === 'true';
+    const lists =
+        ProductWallElement.TOGGLABLE_LISTS.filter(list => list.id === id);
+
+    // Stand alone dropdowns should not close other dropdowns
+    if (isStandAlone) {
+      lists.forEach(list => {
+        const isExpanded = list.classList.contains('expanded');
+        toggleClass(list, 'expanded', !isExpanded);
+        button.setAttribute('aria-expanded', !isExpanded);
+      });
+      return;
+    }
+
+    lists.forEach(list => {
+      const parentList = list.closest('[data-top-level]');
+      const isExpanded = list.classList.contains('expanded');
+      const listsToCollapse = ProductWallElement.TOGGLABLE_LISTS.filter(
+          _list => ![list, parentList].includes(_list));
+      const showOverlay = (parentList && parentList !== list) || !isExpanded;
+      const trackingLabel = button.dataset.trackLabel;
+
+      toggleClass(list, 'expanded', !isExpanded);
+      button.setAttribute('aria-expanded', !isExpanded);
+      button.dataset.trackLabel = trackingLabel.replace(
+          /opened|closed/, isExpanded ? 'opened' : 'closed');
+      showOverlay ? scopeElement.classList.add('menu-expanded') :
+                    scopeElement.classList.remove('menu-expanded');
+
+      if (parentList && parentList !== list) {
+        toggleClass(parentList, 'expanded', true);
+      }
+
+      listsToCollapse.forEach(_list => {
+        toggleClass(_list, 'expanded', false);
+      });
+    });
+  };
+
+
+  /**
+   * Filter categories on filter checkbox change and render
+   * @param {!Event} event
+   */
+  const filter = event => {
+    const input = event.currentTarget;
+    const {checked, value} = input;
+    const isViewAll = value === 'view_all';
+
+    if (hasExperiment) {
+      categories = isViewAll ? [] : [value];
+      !desktopMediaQuery.matches && collapseDropdowns();
+      render();
+    } else {
+      if (isSticky) {
+        scopeElement.scrollIntoView({behavior: 'smooth'});
+      }
+
+      if (checked) {
+        categories = isViewAll ? [] : [value, ...categories];
+      } else {
+        const otherCategories =
+            categories.filter(category => category !== value);
+
+        // Reset categories if view_all check box is selected and categories
+        // were still selected.
+        if (isViewAll) {
+          categories = otherCategories.length ? [] : filterNames;
+        } else {
+          categories = otherCategories;
+        }
+      }
+
+      render();
+    }
+  };
+
+
+  /**
+   * Update category groups, filter count and query params
+   */
+  const render = () => {
+    const count = categories.length;
+    const prepareFilters = ProductWallElement.VIEW_ALL !== null;
+    let viewAll = true;
+
+    if (prepareFilters) {
+      // Check view all checkbox when all categories are unchecked
+      ProductWallElement.VIEW_ALL.checked = !count;
+
+      // Ensure category checkbox is checked, mainly used when categories are
+      // set by url params.
+      ProductWallElement.INPUTS.filter(input => input.value !== 'view_all')
+          .forEach(input => {
+            const checked = categories.includes(input.value);
+            const label = input.dataset.trackLabel;
+            // Update track label for analytics
+            input.dataset.trackLabel =
+                label.replace(/(un)?check/, checked ? 'uncheck' : 'check');
+            input.checked = checked;
+          });
+
+      // Determine if view all is selected and update eventLabel
+      viewAll = ProductWallElement.VIEW_ALL.checked;
+      ProductWallElement.VIEW_ALL.dataset.trackLabel =
+          ProductWallElement.VIEW_ALL.dataset.trackLabel.replace(
+              /(un)?check/, viewAll ? 'uncheck' : 'check');
+
+      !hasExperiment && updateFilterCount(count);
+      updateUrl(categories);
+    }
+
+    // Filter category heading and card sections
+    ProductWallElement.CATEGORY_CONTAINERS.forEach(element => {
+      const category = element.dataset.category;
+      const showElement = viewAll || categories.includes(category);
+      showElement ? element.classList.remove('hidden') :
+                    element.classList.add('hidden');
+    });
+  };
+
+
+  /**
+   * Update filter count in mobile menu
+   * @param {number} count
+   */
+  const updateFilterCount = count => ProductWallElement.COUNT.textContent =
+      count ? ` (${count})` : '';
+
+
+  /**
+   * Update query params based on selected categories
+   * @param {!Array<string>} categories
+   */
+  const updateUrl = categories => {
+    // Clear category query params
+    params.delete('category');
+
+    // Set category query params and update history
+    categories.forEach(category => params.append('category', category));
+    getMannequinService.then(mannequinService => {
+      if (mannequinService.history) {
+        mannequinService.history.replaceState(
+            null, '', `?${params.toString()}`);
+      } else {
+        window.history.replaceState({}, null, `?${params.toString()}`);
+      }
+    });
+  };
+
+
+  /**
+   * Click handler on mobile to collapse menu
+   */
+  const collapseDropdowns = () => {
+    ProductWallElement.TOGGLE_BUTTONS.forEach(
+        button => button.setAttribute('aria-expanded', 'false'));
+    ProductWallElement.TOGGLABLE_LISTS.forEach(
+        list => toggleClass(list, 'expanded', false));
+    scopeElement.classList.remove('menu-expanded');
+  };
+
+
+  /**
+   * Click handler on mobile to clear filters and collapse menu
+   */
+  const clear = () => {
+    categories = [];
+    collapseDropdowns();
+    render();
+  };
+
+  const setupStickyFilterBar = () => {
+    const filterBar = desktopMediaQuery.matches ?
+        ProductWallElement.FILTERS_CONTAINER :
+        ProductWallElement.DROPDOWN;
+    const position = ProductWallElement.NAVBAR.clientHeight;
+    const gordonFrames = Array.from(ProductWallElement.GORDON_FRAMES);
+
+    observer = new IntersectionObserver(([{intersectionRatio}]) => {
+      if (intersectionRatio === 0) {
+        isSticky = true;
+        // Technique from MQN to get position: sticky to work with smith
+        // client
+        scopeElement.style.setProperty('--sticky-position', `${position}px`);
+        document.body.style.overflowX = 'initial';
+        gordonFrames.forEach(frame => frame.style.overflow = 'visible');
+
+        // Add .stuck class when position sticky is active
+        filterBar.classList.add('stuck');
+        window.addEventListener('scroll', barOverlapHandler);
+      } else if (intersectionRatio === 1) {
+        isSticky = false;
+        filterBar.classList.remove('stuck');
+        scopeElement.style.setProperty('--sticky-position', '');
+        document.body.style.overflowX = '';
+        gordonFrames.forEach(frame => frame.style.overflow = '');
+        window.removeEventListener('scroll', barOverlapHandler);
+      }
+    }, {threshold: [0], rootMargin: `-${position + 15}px 0px 100% 0px`});
+
+    observer.observe(scopeElement.querySelector('.filters-top'));
+  };
+
+  const barOverlapHandler = () => {
+    const filterBar = desktopMediaQuery.matches ?
+        ProductWallElement.FILTERS_CONTAINER :
+        ProductWallElement.DROPDOWN;
+    const navRect = ProductWallElement.NAVBAR.getBoundingClientRect();
+    const filterRect = filterBar.getBoundingClientRect();
+    const overlap = navRect.bottom > filterRect.top + 1 &&
+        navRect.top + 1 < filterRect.bottom;
+
+    if (overlap) {
+      isSticky = false;
+      filterBar.classList.remove('stuck');
+    } else {
+      // Rerun observer
+      observer.unobserve(scopeElement.querySelector('.filters-top'));
+      observer.observe(scopeElement.querySelector('.filters-top'));
+    }
+  };
+
+  const handleShowMore = () => {
+    const button = ProductWallElement.SHOW_MORE_BUTTON;
+    const isExpanded = scopeElement.classList.contains('expanded');
+    isExpanded ? scopeElement.classList.remove('expanded') :
+                 scopeElement.classList.add('expanded');
+    const altAriaLabel = button.dataset.altAriaLabel;
+    const replacedAriaLabel = button.getAttribute('aria-label');
+    button.setAttribute('aria-label', altAriaLabel);
+    button.dataset.altAriaLabel = replacedAriaLabel;
+  };
+
+  const setupListeners = () => {
+    ProductWallElement.INPUTS.forEach(
+        input => input.addEventListener('change', filter));
+    ProductWallElement.TOGGLE_BUTTONS.forEach(
+        button => button.addEventListener('click', toggleMenu));
+    ProductWallElement.APPLY_BUTTON &&
+        ProductWallElement.APPLY_BUTTON.addEventListener(
+            'click', collapseDropdowns);
+    ProductWallElement.CLEAR_BUTTON &&
+        ProductWallElement.CLEAR_BUTTON.addEventListener('click', clear);
+    desktopMediaQuery.addListener(setupFilterList);
+    ProductWallElement.SHOW_MORE_BUTTON &&
+        ProductWallElement.SHOW_MORE_BUTTON.addEventListener(
+            'click', handleShowMore);
+  };
+
+  const setupExperiment = () => {};
+
+  this.init = function() {
+    setupListeners();
+    if (ProductWallElement.FILTERS_CONTAINER) {
+      setupFilterList(desktopMediaQuery);
+      // Do not setup sticky bar if experiment is on
+      !hasExperiment && setupStickyFilterBar();
+    }
+    hasExperiment && setupExperiment();
+    render();
+  };
+
+  this.destroy = function() {
+    ProductWallElement.INPUTS.forEach(
+        input => input.removeEventListener('change', filter));
+    ProductWallElement.TOGGLE_BUTTONS.forEach(
+        button => button.removeEventListener('click', toggleMenu));
+    ProductWallElement.APPLY_BUTTON &&
+        ProductWallElement.APPLY_BUTTON.removeEventListener(
+            'click', collapseDropdowns);
+    ProductWallElement.CLEAR_BUTTON &&
+        ProductWallElement.CLEAR_BUTTON.removeEventListener('click', clear);
+    ProductWallElement.SHOW_MORE_BUTTON &&
+        ProductWallElement.SHOW_MORE_BUTTON.removeEventListener(
+            'click', handleShowMore);
+    desktopMediaQuery.removeListener(setupFilterList);
+    window.removeEventListener('scroll', barOverlapHandler);
+  };
+
+  this.init();
+};

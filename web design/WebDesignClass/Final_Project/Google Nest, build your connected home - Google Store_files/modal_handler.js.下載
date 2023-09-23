@@ -1,0 +1,296 @@
+/**
+ * @fileoverview Handles focusing, focus trapping, and a11y functionality for
+ * modals
+ *
+ * HTML Setup for modal:
+ * ```
+ * <div class="gs-modal" id="modal-test" tabindex="-1" role="dialog">
+ *   <a href="#" role="button" class="overlay close-modal id-no-nav"></a>
+ *   <div class="gs-modal-content" style="--width: {$max_width};
+ * --height: {$max_height};"> <div class="gs-modal-header"> // header required
+ *       <h1>Modal Header</h1> // heading optional
+ *       <a href="#" role="button" class="close-modal id-no-nav close-x">╳</a>
+ *     </div>
+ *     # !! Use .gs-modal-iframe or .gs-modal-body
+ *     <div class="gs-modal-iframe">
+ *       <a href="#" role="button" class="close-modal id-no-nav close-x">╳</a>
+ *       <iframe src="/widget/compatibility/doorbell" frameborder="0"
+ * aria-label="widget" tabindex=0></iframe>
+ *     </div>
+ *     <div class="gs-modal-body">
+ *       ...
+ *     </div>
+ *     <div class="gs-modal-footer"> // footer optional
+ *       <a href="#" class="gs-modal-close waves-effect waves-green
+ * btn-flat">Agree</a>
+ *     </div>
+ *   </div>
+ *   <a href="#" role="button" class="overlay close-modal close-modal-end
+ * id-no-nav"></a>
+ * </div>
+ * ```
+ */
+
+/**
+ * Modal system
+ */
+window.ModalHandler = function() {
+  const navbar = document.querySelector('[data-test-navbar]');
+  const state = {origin: null, activeModal: null};
+  let useSafariPolyfill;
+  const TRACKABLE_ORIGINS = ['https://tryassistantmini.withgoogle.com'];
+  const getMannequinService = new Promise(resolve => {
+    const interval = () => window.mannequinService ?
+        resolve(window.mannequinService) :
+        window.requestAnimationFrame(interval);
+    window.requestAnimationFrame(interval);
+  });
+
+
+  /**
+   * Safari Polyfill for setting origin link element
+   * @param {!Event} event
+   */
+  const safariSetOriginHandler = event => {
+    const relatedTarget = event.target;
+    if (relatedTarget.hasAttribute('href')) {
+      const url = relatedTarget.getAttribute('href');
+      const uri = new URL(url);
+      const modal = document.querySelector(`${uri.hash}.gs-modal`);
+      if (modal) {
+        setOrigin(relatedTarget, modal);
+      }
+    }
+  };
+
+  /**
+    Note: using event.explicitOriginalTarget as a fix for FF. Safari still
+    doesn't set relatedTarget on button or link clicks for FocusEvent.
+    @param {!Element} relatedTarget
+    @param {!Element} modal
+  */
+  const setOrigin = (relatedTarget, modal) => {
+    const closeLinks = modal.querySelectorAll('.close-modal');
+
+    if (relatedTarget) {
+      state.origin = relatedTarget;
+
+      if (!state.origin.id) {
+        state.origin.id = `origin-${Date.now()}`;
+      }
+
+      closeLinks.forEach(link => link.href = `#${state.origin.id}`);
+    }
+  };
+
+
+  /**
+   * Handle focus out of modal and properly set focus back on origin links
+   * @param {!Event} event
+   */
+  const modalFocusOutHandler = event => {
+    const relatedTarget = event.relatedTarget || event.explicitOriginalTarget;
+    if (state.activeModal && !state.activeModal.contains(relatedTarget)) {
+      !relatedTarget && state.origin && state.origin.focus();
+      triggerOutOfView(state.activeModal);
+      state.activeModal = null;
+    }
+  };
+
+
+  /**
+   * Handle esc key while focus is on modal
+   * @param {!Event} event
+   */
+  const escapeHandler = event => {
+    const modal = event.target.closest('.gs-modal');
+    if (modal && event.code === 'Escape') {
+      const closeLink = modal.querySelector('.close-modal');
+      closeLink.click();
+    }
+  };
+
+
+  /**
+   * Handle setting origin that triggered modal open
+   * @param {!Event} event
+   */
+  const modalFocusHandler = event => {
+    const modal = event.currentTarget;
+    const iframe = modal.querySelector('iframe');
+    const close = modal.querySelector('.close-x');
+    let setFocusOnCloseButton = state.activeModal !== modal;
+    if (!useSafariPolyfill) {
+      const relatedTarget = event.relatedTarget || event.explicitOriginalTarget;
+      relatedTarget && setOrigin(relatedTarget, modal);
+      setFocusOnCloseButton = ![close, modal].includes(relatedTarget);
+    }
+    if (iframe && !iframe.hasAttribute('src')) {
+      iframe.setAttribute('src', iframe.getAttribute('data-src'));
+    }
+
+    // Set focus on close if modal is not already open
+    if (setFocusOnCloseButton) {
+      close.focus();
+      triggerInView(modal);
+    }
+
+    triggerInView(modal);
+    state.activeModal = modal;
+  };
+
+
+  /**
+   * Focus on first close button on iframe focusout
+   * NOTE: Used for modals with iframe
+   * @param {!Event} event
+   */
+  const iframeFocusTrappingHandler = event => {
+    const close =
+        event.currentTarget.closest('.gs-modal').querySelector('.close-x');
+    close.focus();
+  };
+
+
+  /**
+   * Focus on first close button on modal focusout
+   * NOTE: Used for modals without iframe
+   * @param {!Event} event
+   */
+  const focusTrappingHandler = event => {
+    const close = event.target.querySelector('.close-x');
+    close.focus();
+  };
+
+
+  /**
+   * Sets id-no-nav class on links that trigger modal
+   * @param {!Element} modal
+   */
+  const setIdNoNav = modal => link => {
+    const uri = new URL(link.href);
+    if (uri.hash.substr(1) === modal.id) {
+      link.classList.add('id-no-nav');
+    }
+  };
+
+
+  /**
+   * Sets up modal listeners and sets 'id-no-nav' on links with matching hash as
+   * modal id
+   * @param {!NodeList<?Element>} modal
+   */
+  const setupModal = modal => {
+    const iframe = modal.querySelector('iframe');
+
+    document.querySelectorAll(`[href*=${modal.id}]`).forEach(setIdNoNav(modal));
+
+    if (iframe) {
+      const close = modal.querySelector('.close-modal-end');
+      close.addEventListener('focus', iframeFocusTrappingHandler);
+      getMannequinService.then(mannequinService => {
+        const url =
+            mannequinService.maybeModifyUrl(iframe.getAttribute('data-src'));
+        iframe.setAttribute('data-src', url);
+      });
+    } else {
+      modal.addEventListener('transitionend', focusTrappingHandler);
+    }
+
+    modal.addEventListener('focus', modalFocusHandler);
+    modal.addEventListener('focusout', modalFocusOutHandler);
+
+    // Queue up checking modal visibility
+    setTimeout(() => checkInitialVisibility(modal), 0);
+  };
+
+
+  /**
+   * Ensure focus on modal if visible on load
+   * @param {!Element} modal
+   */
+  const checkInitialVisibility = modal => {
+    const display = window.getComputedStyle(modal).display;
+    const close = modal.querySelector('.close-x');
+    if (display === 'grid') {
+      triggerInView(modal);
+      close.focus();
+      modalFocusHandler({currentTarget: modal});
+    }
+  };
+
+
+  /**
+   * Triggers analytics event when modal is opened
+   * @param {!Element} modal
+   */
+  const triggerInView = modal => {
+    modal.classList.add('in-view');
+
+    const inView = document.createEvent('Event');
+    inView.initEvent('in-view', true, true);
+
+    modal.dispatchEvent(inView);
+
+    // Prevent scrolling while modal is open
+    document.body.style.overflowY = 'hidden';
+
+    // Prevent navbar from overlapping modal
+    navbar.style.zIndex = 'unset';
+  };
+
+
+  /**
+   * Triggers analytics event when modal is closed
+   * @param {!Element} modal
+   */
+  const triggerOutOfView = modal => {
+    modal.classList.remove('in-view');
+
+    const outOfView = document.createEvent('Event');
+    outOfView.initEvent('out-of-view', true, true);
+
+    modal.dispatchEvent(outOfView);
+
+    // Reset style of body overflow and navbar z-index
+    document.body.style.overflowY = null;
+    navbar.style.zIndex = null;
+  };
+
+
+  // Depending on the origin of the postMessage, send all data, that contains
+  // event key, from the event to dataLayer for analytics (b/184570644)
+  const handlePostMessage = ({data, origin}) =>
+      TRACKABLE_ORIGINS.includes(origin) && data.event && dataLayer.push(data);
+
+
+  this.init = () => {
+    const modals = document.querySelectorAll('.gs-modal');
+    getMannequinService.then(({isSafari}) => {
+      useSafariPolyfill = isSafari;
+      if (isSafari) {
+        document.addEventListener('click', safariSetOriginHandler);
+      }
+    });
+    document.addEventListener('keyup', escapeHandler);
+    window.addEventListener('message', handlePostMessage);
+    if (modals) {
+      modals.forEach(setupModal);
+    }
+  };
+
+
+  this.destroy = () => {
+    // Not removing event listeners from modal since
+    // we are removing them from the DOM
+    if (modals) {
+      modals.forEach(modal => modal.remove());
+    }
+    document.removeEventListener('click', safariSetOriginHandler);
+    document.removeEventListener('keyup', escapeHandler);
+    window.removeEventListener('message', handlePostMessage);
+  };
+
+
+  this.init();
+};

@@ -1,0 +1,183 @@
+/**
+ * @fileoverview Service for lazy loading image src attributes
+ * HTML Usage
+ *
+ * Examples for lazy loading background-image:
+ *
+ * <section wombat-template lazy-load
+ *   data-desktop-src="..."
+ *   data-tablet-src="..."
+ *   data-mobile-src="..."></section>
+ *
+ * <div role="img" lazy-load
+ *   data-desktop-src="..."
+ *   data-tablet-src="..."
+ *   data-mobile-src="..."></div>
+ *
+ *
+ * Example for lazy loading img tag source:
+ *
+ * <img lazy-load
+ *   data-mobile-src="..."
+ *   data-tablet-src="..."
+ *   data-desktop-src="..."/>
+ *
+
+ * Example for lazy loading video source:
+ *
+ * <video lazy-load autoplay playsinline muted disableremoteplayback>
+ *   <source data-mobile-src="..."
+ *       data-tablet-src="..."
+ *       data-desktop-src="..." type="video/mp4"></source>
+ * </video>
+ *
+ * NOTE: If mobile and/or tablet sources are not present the source defaults to
+ *       desktop.
+ */
+
+/**
+ * Changes src attribute on img tag when it comes into viewport.
+ * @param {!HTMLElement} scopeElement Image element
+ */
+function WombatLazyLoad(scopeElement) {
+  // TODO Redefine based on data
+  const mobileMQ = window.matchMedia('(max-width: 599px)');
+  const tabletMQ =
+      window.matchMedia('(min-width: 600px) and (max-width: 767px)');
+  let resizeTimer;
+  let observer;
+  const params = new URLSearchParams(window.location.search);
+  const hasDisableParam = params.get('disableLazyLoad');
+
+  /**
+   * Sets class when image/video resource has been loaded.
+   */
+  const setImageLoadedClass = () =>
+      scopeElement.classList.add('lazy-image-loaded');
+
+  /**
+   * Callback function from IntersectionObserver which updates asset sources if
+   * element is visible to user.
+   * @param {!IntersectionObserverEntry} entries Entries of elements observed
+   */
+  const observerCallback = entries => {
+    entries.forEach(entry => {
+      const {target, intersectionRatio} = entry;
+      const isVisible = intersectionRatio > 0;
+
+      if (isVisible) {
+        setSource(target);
+        window.addEventListener('resize', resizeEventHandler);
+      } else {
+        window.removeEventListener('resize', resizeEventHandler);
+      }
+    });
+  };
+
+  /**
+   * Fetches source url that matches current viewport
+   * @param {!HTMLElement} element element to get viewport sources from
+   * @return {string} Source of asset based on viewport
+   */
+  const getResponsiveSource = element => {
+    const {mobileSrc, tabletSrc, desktopSrc} = element.dataset;
+
+    if (mobileMQ.matches && mobileSrc) {
+      return mobileSrc;
+    } else if (tabletMQ.matches && tabletSrc) {
+      return tabletSrc;
+    } else {
+      return desktopSrc;
+    }
+  };
+
+  /**
+   * Sets the source url for the video, img or background of the current element
+   * @param {!HTMLElement} element element to set source on
+   */
+  const setSource = element => {
+    const source = getResponsiveSource(element);
+
+    switch (element.tagName) {
+      case 'IMG':
+        if (element.src !== source) {
+          element.src = source;
+        }
+        break;
+      case 'VIDEO':
+        const sourceElements = [...element.children];
+        sourceElements.forEach(sourceElement => {
+          const videoSource = getResponsiveSource(sourceElement);
+          if (sourceElement.src !== videoSource) {
+            sourceElement.src = videoSource;
+            element.load();
+          }
+        });
+        break;
+      default:
+        const backgroundValue = `url(${source})`;
+        const currentBackgroundValue =
+            element.style.getPropertyValue('--lazy-load-source');
+
+        if (currentBackgroundValue !== backgroundValue) {
+          element.style.setProperty('--lazy-load-source', backgroundValue);
+        }
+        break;
+    }
+  };
+
+  /**
+   * Event handler that updates the source if the viewport has changed
+   */
+  const resizeEventHandler = () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      setSource(scopeElement);
+    }, 250);
+  };
+
+
+  const disableLazyLoadListener = () => {
+    const target = document.documentElement;
+    const observer = new MutationObserver((mutations) => {
+      for (let mutation of mutations) {
+        const classAdded = mutation.type === 'attributes' &&
+            mutation.attributeName === 'class' &&
+            target.classList.contains('disable-lazy-load');
+        if (classAdded) {
+          setSource(scopeElement);
+          window.addEventListener('resize', resizeEventHandler);
+          observer.disconnect();
+        }
+      }
+    });
+
+    observer.observe(
+        target, {attributes: true, childList: false, subtree: false});
+  };
+
+  this.init = () => {
+    const isDisabled = hasDisableParam;
+    disableLazyLoadListener();
+
+    scopeElement.addEventListener('load', setImageLoadedClass);
+    scopeElement.addEventListener('loadeddata', setImageLoadedClass);
+
+    if (isDisabled) {
+      setSource(scopeElement);
+      window.addEventListener('resize', resizeEventHandler);
+    } else {
+      observer = new IntersectionObserver(observerCallback, {threshold: 0});
+      observer.observe(scopeElement);
+    }
+  };
+
+  this.destroy = () => {
+    if (observer) observer.unobserve(scopeElement);
+    window.removeEventListener('resize', resizeEventHandler);
+    scopeElement.removeEventListener('load', setImageLoadedClass);
+    scopeElement.removeEventListener('loadeddata', setImageLoadedClass);
+  };
+
+  this.init();
+}

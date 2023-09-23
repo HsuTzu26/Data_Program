@@ -1,0 +1,7 @@
+*JavaScript進階學習
+1. Fetch API
+2. Promise, Async,Await, JS的非同步
+3. JS的this
+4. 原型鏈- 繼承的概念
+5. ES6陣列操作- API
+6. import export JS的模組化概念- 分裝各功能- 更好維護

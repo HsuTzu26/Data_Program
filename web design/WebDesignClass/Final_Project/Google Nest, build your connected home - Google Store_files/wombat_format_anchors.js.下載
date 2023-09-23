@@ -1,0 +1,19 @@
+/**
+ * @function WombatFormatAnchors Format markdown style links into anchor tags
+ * @param {!HTMLelement} scopeElement Element to format links
+ */
+var WombatFormatAnchors = function(scopeElement) {
+  var anchorMatch = new RegExp(
+      /\[([^\[\]]+?)\]\(((?:https?:)?(?:\/\/)?[a-z0-9-._~:\/?#\[\]@!$&'()*+,;=]+)\)/ig);
+
+  function markdownToLinks() {
+    scopeElement.innerHTML = scopeElement.innerHTML.replace(
+        anchorMatch, '<a href="$2" title="$1">$1</a>');
+  }
+
+  this.init = function() {
+    markdownToLinks();
+  };
+
+  this.init();
+};

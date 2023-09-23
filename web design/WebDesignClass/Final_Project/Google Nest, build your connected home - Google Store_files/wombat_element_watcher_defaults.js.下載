@@ -1,0 +1,40 @@
+/**
+ * @fileoverview WombatElementWatcherDefaults Class that triggers when user enters / exits on the scoped element.
+ */
+
+/**
+ * @function WombatElementWatcherDefaults is the class for the default setup wombat
+ * templates will use for the elementWatcher
+ * @param {!HTMLElement} scopeElement the element that the element watcher is attached to
+ */
+function WombatElementWatcherDefaults(scopeElement) {
+
+  this.init = function() {
+    WombatElementWatcher.add({
+      element: scopeElement,
+      enter(scopeElement) {
+        scopeElement.classList.add('in-view');
+
+        var inView = document.createEvent('Event');
+        inView.initEvent('in-view', true, true);
+
+        scopeElement.dispatchEvent(inView);
+      },
+      exitOffset(scopeElement) {
+        var exitPosition = window.innerHeight + scopeElement.offsetHeight;
+        return exitPosition;
+      },
+      exit(scopeElement) {
+        scopeElement.classList.remove('in-view');
+
+        var outOfView = document.createEvent('Event');
+        outOfView.initEvent('out-of-view', true, true);
+
+        scopeElement.dispatchEvent(outOfView);
+      },
+      persist: true,
+    });
+  };
+
+  this.init();
+}

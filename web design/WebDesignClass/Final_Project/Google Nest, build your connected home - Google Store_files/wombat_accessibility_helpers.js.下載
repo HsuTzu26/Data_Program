@@ -1,0 +1,29 @@
+/**
+ * @fileoverview Description of this file.
+ */
+
+window.WombatAccessibilityHelpers = {
+  /**
+   * Programmatically set focus for A11y purposes to select focus for screen
+   * readers. Multiple focus calls necessary to ensure screen reader usability.
+   * Source
+   * https://silvantroxler.ch/2016/setting-voiceover-focus-with-javascript/
+   * @param {!Element} element
+   */
+  setVoiceOverFocus: element => {
+    const focusInterval = 30;          // ms, time between function calls
+    const focusTotalRepetitions = 30;  // number of repetitions
+
+    element.setAttribute('tabindex', '0');
+    element.blur();
+
+    let focusRepetitions = 0;
+    const interval = setInterval(function() {
+      element.focus();
+      focusRepetitions++;
+      if (focusRepetitions >= focusTotalRepetitions) {
+        clearInterval(interval);
+      }
+    }, focusInterval);
+  }
+};

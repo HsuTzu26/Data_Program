@@ -1,0 +1,25 @@
+/**
+ * @fileoverview Utilities for images mainly pertaining to fife param management
+ */
+window.WombatImageUtils = new (function() {
+  const PARAM_REGEXP = /=(.*)$/i;
+
+  this.getFifeParams = url => {
+    const match = url.match(PARAM_REGEXP);
+    return match ? match[1].split('-') : [];
+  };
+
+  this.setWidthByElement = (url, element) => {
+    const width = element.clientWidth * window.devicePixelRatio;
+    return this.setWidth(url, width);
+  };
+
+  this.setWidth = (url, width) => {
+    const params = this.getFifeParams(url).filter(p => !p.startsWith('w'));
+    const hasParams = params.length > 0;
+    // Rounding to prevent decimal value i.e. 500.5 vs 501
+    params.push(`w${Math.round(width)}`);
+    const paramsStr = `=${params.join('-')}`;
+    return hasParams ? url.replace(PARAM_REGEXP, paramsStr) : url + paramsStr;
+  };
+});
