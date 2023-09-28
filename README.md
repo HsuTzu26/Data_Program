@@ -18,3 +18,5 @@
     
 - 1121
   - Now
+  - Manipulating Data Using SAS
+  - Tools and Applications on Big Data Analysis
