@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "#\n# 實例ch14_20.R\n#\nch14_20 <- function( )\n{\n  x <- readClipboard()\n  print(x)\n}\n",
+    "created" : 1486633247243.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2508794062",
+    "id" : "73844ECF",
+    "lastKnownWriteTime" : 1487060079,
+    "last_content_update" : 1487060079450,
+    "path" : "D:/cyhsu/Rcb1507/cb1507/ch14_20.R",
+    "project_path" : "ch14_20.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

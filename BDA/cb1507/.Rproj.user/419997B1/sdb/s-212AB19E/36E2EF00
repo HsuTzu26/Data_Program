@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "#\n# 實例ch15_2.R\n#\nch15_2 <- function( )\n{\n  set.seed(1)\n  sample(deck, 52)\n}\n",
+    "created" : 1487065321216.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2289186744",
+    "id" : "36E2EF00",
+    "lastKnownWriteTime" : 1487065340,
+    "last_content_update" : 1487065340222,
+    "path" : "D:/cyhsu/Rcb1507/cb1507/ch15_2.R",
+    "project_path" : "ch15_2.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

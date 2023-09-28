@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "mit.Name <-c(\"Kevin\",\"Peter\",\"Frank\",\"Meggie\")\nmit.Gender <-c(\"M\",\"M\",\"M\",\"F\")\nmit.Height <-c(170,175,165,168)\nmit.info <-data.frame(mit.Name, mit.Gender, mit.Height, stringsAsFactors = FALSE)\nWeight<-c(65, 71,58,55)\nmit.info$Weight<-Weight\nAge <- c(19, 20, 20,19)\nScore <- c(88,91, 75, 80)\nA1<-data.frame(Age, Score)\nmit.info <-cbind(mit.info,A1)\nmit.info <-rbind(mit.info, c(\"Amy\",\"F\", 161, 58, 20,95))\nmit.info <-rbind(mit.info, c(\"Roger\",\"M\", 181, 78, 19,87))\nmit.info <-rbind(mit.info, c(\"Mary\",\"F\", 171, 57, 18,93))\n\n#假如要刪掉第二列(Mid的數據)，就直接將除了第二列以外的數據直接指定給mit.info\nmit.infonew <- mit.info[-2,]\n##一樣用上述的方式還是可以找的到\nmit.info[mit.info$Age ==19,]\n\n##若要找 Age 為 18 與 19 的資料\nmit.info[mit.info$Age %in% c(18,19),]\n\n##也可以用 subset 函數來找 Age為19的 欄位\n\nsubset(mit.info, Age == 19)\n\nmit.info.sub3 <- subset(mit.info, Age == 19)\n## 也可以多條件查詢\n\nmit.info.sub5 <- subset(mit.info, Score < 90 & Score > 80)\n",
+    "created" : 1489560627207.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1217657524",
+    "id" : "CA68AFC0",
+    "lastKnownWriteTime" : 1489565884,
+    "last_content_update" : 1489565884534,
+    "path" : "D:/cyhsu/Rcb1507/cb1507/ch7_1.R",
+    "project_path" : "ch7_1.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 13,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

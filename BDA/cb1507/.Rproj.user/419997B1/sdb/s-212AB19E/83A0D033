@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "#\n# 實例ch15_68.R\n#\nch15_68 <- function( )\n{\n  balls <- data.frame(\n    game = c(\"G1\", \"G2\", \"G3\", \"G4\", \"G5\"),\n    site = c(\"Memphis\", \"Oxford\", \"Lexington\", \"Oxford\", \"Lexington\"),\n    Lin = c(15, 6, 26, 22, 18),\n    Jordon = c(18, 32, 21, 25,12),\n    Peter = c(10, 6, 22, 9,12)\n  )\n  print(balls)\n}\n",
+    "created" : 1487240655384.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1728527449",
+    "id" : "83A0D033",
+    "lastKnownWriteTime" : 1487240840,
+    "last_content_update" : 1487240878800,
+    "path" : "D:/cyhsu/Rcb1507/cb1507/ch15_68.R",
+    "project_path" : "ch15_68.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

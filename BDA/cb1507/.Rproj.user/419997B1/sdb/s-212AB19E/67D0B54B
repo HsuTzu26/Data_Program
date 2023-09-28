@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "#\n# 實例ch14_19.R\n#\nch14_19 <- function( )\n{\n  write(letters, file = \"\", ncolumns = 5)   #輸出至螢幕有5欄\n  write(letters, file = \"\")                 #輸出至螢幕有1欄\n  write(letters, file = \"d:/cyhsu/Rcb1507/cb1507/ch14_19test1.txt\", ncolumns = 5)\n  write(letters, file = \"d:/cyhsu/Rcb1507/cb1507/ch14_19test2.txt\")     \n  x1 <- 1:10\n  write(x1, \"\", ncolumns = 4, sep = \",\")\n  x2 <- matrix(1:10, nrow = 2)\n  write(x2, file = \"\", ncolumns = 5)\n}\n\n",
+    "created" : 1487059200385.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1768138236",
+    "id" : "67D0B54B",
+    "lastKnownWriteTime" : 1487060339,
+    "last_content_update" : 1487060339657,
+    "path" : "D:/cyhsu/Rcb1507/cb1507/ch14_19.R",
+    "project_path" : "ch14_19.R",
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

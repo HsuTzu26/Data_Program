@@ -1,0 +1,28 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1489561966534.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "C29EAC4F",
+    "lastKnownWriteTime" : 7308604914264011873,
+    "last_content_update" : 1489561966534,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "wgcdngkgjg",
+        "caption" : "mit.info",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=mit.info&cache_key=wgcdngkgjg",
+        "displayedObservations" : "7",
+        "environment" : "",
+        "object" : "mit.info",
+        "totalObservations" : "7",
+        "variables" : "6"
+    },
+    "relative_order" : 14,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

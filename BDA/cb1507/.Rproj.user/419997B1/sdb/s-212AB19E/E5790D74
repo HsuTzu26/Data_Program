@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "#\n# 實例ch14_21.R\n#\nch14_21 <- function( )\n{\n  x <- read.table(file = \"clipboard\", sep = \"\\t\", header = TRUE)\n  print(x)\n}\n",
+    "created" : 1487061208752.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1522184763",
+    "id" : "E5790D74",
+    "lastKnownWriteTime" : 1487061218,
+    "last_content_update" : 1487061218453,
+    "path" : "D:/cyhsu/Rcb1507/cb1507/ch14_21.R",
+    "project_path" : "ch14_21.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

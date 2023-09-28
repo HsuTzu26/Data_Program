@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "month.data<-c(31,28,31,30,31,30,31,31,30,31,30,31)\nnames(month.data)<-month.name\nmonth.data\nnames(month.data[month.data==31])\n\n\n\nsort(islands,decreasing = TRUE)[30]\nsort(islands,decreasing = TRUE)[35]\n\nhead(sort(islands,decreasing = TRUE),15)\ntail(sort(islands,decreasing = TRUE),15)\n\n\nsort(islands,decreasing = TRUE)[seq(1,length(islands),by=2)]\nsort(islands,decreasing = TRUE)[seq(2,length(islands),by=2)]\n\n",
+    "created" : 1488443659796.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3087768054",
+    "id" : "849B726C",
+    "lastKnownWriteTime" : 1488777805,
+    "last_content_update" : 1488777805496,
+    "path" : "D:/cyhsu/Rcb1507/cb1507/ch04_hw.R",
+    "project_path" : "ch04_hw.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 11,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

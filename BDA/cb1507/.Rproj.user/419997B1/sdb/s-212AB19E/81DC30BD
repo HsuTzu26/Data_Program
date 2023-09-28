@@ -1,0 +1,28 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1489565232858.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "81DC30BD",
+    "lastKnownWriteTime" : 7308604914264011873,
+    "last_content_update" : 1489565232858,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "n7slk2zfc1",
+        "caption" : "mit.infonew",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=mit.infonew&cache_key=n7slk2zfc1",
+        "displayedObservations" : 6,
+        "environment" : "",
+        "object" : "mit.infonew",
+        "totalObservations" : 6,
+        "variables" : 6
+    },
+    "relative_order" : 15,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}
