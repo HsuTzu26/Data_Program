@@ -1,0 +1,362 @@
+> # 載入需要的套件
+> #install.packages("magrittr")
+> #install.packages("rpart")
+> library(magrittr)
+> library(rpart)
+> # 讀取資料
+> titanic <- read.csv("d:/rtemp/BDA/DATA/train.csv", header = TRUE)
+> str(titanic)
+'data.frame':	891 obs. of  12 variables:
+ $ PassengerId: int  1 2 3 4 5 6 7 8 9 10 ...
+ $ Survived   : int  0 1 1 1 0 0 0 0 1 1 ...
+ $ Pclass     : int  3 1 3 1 3 3 1 3 3 2 ...
+ $ Name       : chr  "Braund, Mr. Owen Harris" "Cumings, Mrs. John Bradley (Florence Briggs Thayer)" "Heikkinen, Miss. Laina" "Futrelle, Mrs. Jacques Heath (Lily May Peel)" ...
+ $ Sex        : chr  "male" "female" "female" "female" ...
+ $ Age        : num  22 38 26 35 35 NA 54 2 27 14 ...
+ $ SibSp      : int  1 1 0 1 0 0 0 3 0 1 ...
+ $ Parch      : int  0 0 0 0 0 0 0 1 2 0 ...
+ $ Ticket     : chr  "A/5 21171" "PC 17599" "STON/O2. 3101282" "113803" ...
+ $ Fare       : num  7.25 71.28 7.92 53.1 8.05 ...
+ $ Cabin      : chr  "" "C85" "" "C123" ...
+ $ Embarked   : chr  "S" "C" "S" "S" ...
+> # 取 Survived存活與否, Pclass艙等/船票等級, Sex性別, 
+> # Age年齡, Parch在船上之家族中的小孩數目 
+> # Fare船票價格, Cabin床艙號碼
+> 
+> # 刪除所有 NA 值 (using na.omit, return 刪除 NA 後的 vector)
+> mytitanic <- titanic[, c(2, 3, 5, 6, 8, 10, 11)] %>% na.omit
+> # 設立 factor和levels, 存活為1 level 1, 非存活為0 level 2
+> mytitanic$Survived <- factor(mytitanic$Survived, levels = c(1, 0))
+> str(mytitanic)
+'data.frame':	714 obs. of  7 variables:
+ $ Survived: Factor w/ 2 levels "1","0": 2 1 1 1 2 2 2 1 1 1 ...
+ $ Pclass  : int  3 1 3 1 3 1 3 3 2 3 ...
+ $ Sex     : chr  "male" "female" "female" "female" ...
+ $ Age     : num  22 38 26 35 35 54 2 27 14 4 ...
+ $ Parch   : int  0 0 0 0 0 0 1 2 0 1 ...
+ $ Fare    : num  7.25 71.28 7.92 53.1 8.05 ...
+ $ Cabin   : chr  "" "C85" "" "C123" ...
+ - attr(*, "na.action")= 'omit' Named int [1:177] 6 18 20 27 29 30 32 33 37 43 ...
+  ..- attr(*, "names")= chr [1:177] "6" "18" "20" "27" ...
+> 
+> # 建立決策樹模型
+> # set random seed, 使每次隨機的資料都一致
+> set.seed(123)
+> # set treeModel, 存活+艙等+性別+年齡
+> treeModel <- rpart(Survived ~ Pclass+Sex+Age, data = mytitanic, method = "class")
+> # Accuracy 0.8165266
+> 
+> # set treeModel, 存活+艙等+性別+年齡+在船上之家族中的小孩數目 
+> treeModel <- rpart(Survived ~ Pclass+Sex+Age+Parch, data = mytitanic, method = "class")
+> # Accuracy 0.8165266
+> 
+> # set treeModel, 存活+艙等+性別+年齡+在船上之家族中的小孩數目 
+> # + 船票價格
+> treeModel <- rpart(Survived ~ Pclass+Sex+Age+Parch+Fare, data = mytitanic, method = "class")
+> # Accuracy 0.8319328
+> 
+> # set treeModel, 全取
+> treeModel <- rpart(Survived ~ ., data = mytitanic, method = "class")
+> # Accuracy 0.8809524
+### Conclusion ###
+# 全取後準確率最高的原因- 信息量廣, 樣本間具特徵相關性
+# Pclass 艙位等級通常與社會地位相關, 越高等級的艙等可能有更高的生存率
+# Sex 女性有較高的生存率, 因為救援通常優先考慮婦女和兒童
+# Age 兒童和老年人可能有更高的生存率
+# Parch 家庭單位大小會影響生存機會
+# Fare 船票價格和艙等有關, 越昂貴對映著高艙等, 即對應高生存率
+# Carbin 表示乘客所在的船艙, 船艙的逃生位置及機制會影響生存率
+> 
+>  ### Conclusion ###
+> # 全取後準確率最高的原因- 信息量廣, 樣本間具特徵相關性
+> # Pclass 艙位等級通常與社會地位相關, 越高等級的艙等可能有更高的生存率
+> # Sex 女性有較高的生存率, 因為救援通常優先考慮婦女和兒童
+> # Age 兒童和老年人可能有更高的生存率
+> # Parch 家庭單位大小會影響生存機會
+> # Fare 船票價格和艙等有關, 越昂貴對映著高艙等, 即對應高生存率
+> # Carbin 表示乘客所在的船艙, 船艙的逃生位置及機制會影響生存率
+> 
+> titanicToBePredicted <- mytitanic[, -1]
+> prediction <- predict(treeModel, newdata = titanicToBePredicted, type = "class")
+> # 將混淆矩陣印出來
+> confusionMatrix <- table(mytitanic$Survived, prediction, dnn = c("Actual", "Predicted"))
+> confusionMatrix
+      Predicted
+Actual   1   0
+     1 234  56
+     0  29 395
+> # 獲得TP, TN, FP, FN
+> TP <- confusionMatrix[1, 1]
+> TN <- confusionMatrix[2, 2]
+> FP <- confusionMatrix[2, 1]
+> FN <- confusionMatrix[1, 2]
+> # 計算accuracy, TPR, FPR
+> accuracy1 <- (TP + TN)/(TP + TN + FP + FN)
+> # diag(confusionMatrix)- 提取 CM 的對角元素 (TP & TN)
+> # sum(confusionMatrix)- 計算 CM 總和
+> accuracy2 <- sum(diag(confusionMatrix))/sum(confusionMatrix)# 試試這樣算
+> 
+> #敏感度 Sensitivity => recall
+> # 在所有正樣本當中，能夠預測多少正樣本的比例
+> # 也就是衡量模型中對 Positive 的檢測能力, 越高越能識別正樣本
+> TPR <- TP/(TP + FN)
+> TPR
+[1] 0.8068966
+> 
+> #特異度 Specificity 
+> # 在所有負樣本當中，能夠預測多少負樣本的比例
+> # 也就是衡量模型中對 Negative 的檢測能力, 越高越能排除負樣本
+> TNR <- TN/(FP + TN)
+> TNR
+[1] 0.9316038
+> 
+> #False Postive Rate
+> FPR <- FP/(FP + TN)
+> FPR
+[1] 0.06839623
+> #False Negative Rate
+> FNR <- FN/(TP + FN)
+> FNR
+[1] 0.1931034
+> 
+> # accuracy, TPR, FPR
+> accuracy1
+[1] 0.8809524
+> accuracy2
+[1] 0.8809524
+> 
+> #-----------------------------------
+> #packages <- c("rpart", "rattle", "rpart.plot", "RColorBrewer", "magrittr")
+> 
+> # for (i in packages){
+> #   install.packages(i)
+> # }
+> #install.packages(packages)
+> sapply(packages, FUN = library, character.only = TRUE)
+      rpart          rattle         rpart.plot     RColorBrewer  
+ [1,] "e1071"        "e1071"        "e1071"        "e1071"       
+ [2,] "caret"        "caret"        "caret"        "caret"       
+ [3,] "lattice"      "lattice"      "lattice"      "lattice"     
+ [4,] "ggplot2"      "ggplot2"      "ggplot2"      "ggplot2"     
+ [5,] "partykit"     "partykit"     "partykit"     "partykit"    
+ [6,] "mvtnorm"      "mvtnorm"      "mvtnorm"      "mvtnorm"     
+ [7,] "libcoin"      "libcoin"      "libcoin"      "libcoin"     
+ [8,] "grid"         "grid"         "grid"         "grid"        
+ [9,] "RColorBrewer" "RColorBrewer" "RColorBrewer" "RColorBrewer"
+[10,] "rpart.plot"   "rpart.plot"   "rpart.plot"   "rpart.plot"  
+[11,] "rattle"       "rattle"       "rattle"       "rattle"      
+[12,] "bitops"       "bitops"       "bitops"       "bitops"      
+[13,] "tibble"       "tibble"       "tibble"       "tibble"      
+[14,] "rpart"        "rpart"        "rpart"        "rpart"       
+[15,] "magrittr"     "magrittr"     "magrittr"     "magrittr"    
+[16,] "stats"        "stats"        "stats"        "stats"       
+[17,] "graphics"     "graphics"     "graphics"     "graphics"    
+[18,] "grDevices"    "grDevices"    "grDevices"    "grDevices"   
+[19,] "utils"        "utils"        "utils"        "utils"       
+[20,] "datasets"     "datasets"     "datasets"     "datasets"    
+[21,] "methods"      "methods"      "methods"      "methods"     
+[22,] "base"         "base"         "base"         "base"        
+      magrittr      
+ [1,] "e1071"       
+ [2,] "caret"       
+ [3,] "lattice"     
+ [4,] "ggplot2"     
+ [5,] "partykit"    
+ [6,] "mvtnorm"     
+ [7,] "libcoin"     
+ [8,] "grid"        
+ [9,] "RColorBrewer"
+[10,] "rpart.plot"  
+[11,] "rattle"      
+[12,] "bitops"      
+[13,] "tibble"      
+[14,] "rpart"       
+[15,] "magrittr"    
+[16,] "stats"       
+[17,] "graphics"    
+[18,] "grDevices"   
+[19,] "utils"       
+[20,] "datasets"    
+[21,] "methods"     
+[22,] "base"        
+> # install.packages()
+> # library()
+> # 讀取資料
+> titanic <- read.csv("d:/rtemp/BDA/DATA/train.csv", header = TRUE)
+> titanic <- titanic[, -c(4, 9, 11)] %>% na.omit
+> 
+> # magrittr 套件中最重要的功能就是 %>% 管線運算子，
+> # 它的作用在於將左側的運算結果傳遞至右側函數的第一個參數
+> # 請參考https://blog.gtwang.org/r/r-pipes-magrittr-package/
+> str(titanic)
+'data.frame':	714 obs. of  9 variables:
+ $ PassengerId: int  1 2 3 4 5 7 8 9 10 11 ...
+ $ Survived   : int  0 1 1 1 0 0 0 1 1 1 ...
+ $ Pclass     : int  3 1 3 1 3 1 3 3 2 3 ...
+ $ Sex        : chr  "male" "female" "female" "female" ...
+ $ Age        : num  22 38 26 35 35 54 2 27 14 4 ...
+ $ SibSp      : int  1 1 0 1 0 0 3 0 1 1 ...
+ $ Parch      : int  0 0 0 0 0 0 1 2 0 1 ...
+ $ Fare       : num  7.25 71.28 7.92 53.1 8.05 ...
+ $ Embarked   : chr  "S" "C" "S" "S" ...
+ - attr(*, "na.action")= 'omit' Named int [1:177] 6 18 20 27 29 30 32 33 37 43 ...
+  ..- attr(*, "names")= chr [1:177] "6" "18" "20" "27" ...
+> # 取 titanic dataset 樣本數
+> n<-nrow(titanic)
+> # 隨機排列資料集
+> set.seed(123) 
+> #set a random seed, so that sample() results will be the same everytime.
+> shuffledTitanic <- titanic[sample(n), ]   #sample: random select
+> # 將資料集分為訓練與測試
+> trainIndices <- 1:round(0.7 * n)
+> train <- shuffledTitanic[trainIndices, ]
+> testIndices <- (round(0.7 * n) + 1):n
+> test <- shuffledTitanic[testIndices, ]
+> 
+> # 建立一個決策樹模型
+> tree <- rpart(formula = Survived ~ ., data = train, method = "class")
+> prediction <- predict(tree, newdata = test, type="class")
+> 
+> ### fancyRpartPlot
+> # 以明確的文字及鮮明的顏色標示出分類的依據
+> # 比起其他的決策樹, 這種可視化呈現更容易解讀
+> fancyRpartPlot(tree,cex=0.7)
+> 
+> ### plot and text
+> # 最基礎的文字及決策樹可視化
+> # 結果皆有顯示, 但分類上不太容易解讀
+> plot(tree);text(tree)
+> 
+> ### prp
+> # 比起最簡單的文字, 在可視化及結果顯示出了分類數量
+> # 可以很直觀的得知分類結果為何
+> library(rpart.plot)
+> prp(tree,faclen=0,fallen.leaves=TRUE,shadow.col="gray",extra=2,cex = 1) 
+> 
+> ### partykit
+> # 將分類結果使用量表方式呈現, 可以得知結果所佔的比率為何
+> #寫法1
+> library(partykit)
+> plot(as.party(tree),cex = 0.8) 
+> #寫法2
+> require(partykit)   
+> rparty.tree <- as.party(tree) # 轉換cart決策樹
+> rparty.tree # 輸出各節點的細部資訊
+
+Model formula:
+Survived ~ PassengerId + Pclass + Sex + Age + SibSp + Parch + 
+    Fare + Embarked
+
+Fitted party:
+[1] root
+|   [2] Sex in male
+|   |   [3] Age >= 6.5
+|   |   |   [4] Pclass >= 1.5: 0.114 (n = 228, err = 23.0)
+|   |   |   [5] Pclass < 1.5
+|   |   |   |   [6] PassengerId < 548.5: 0.182 (n = 44, err = 6.5)
+|   |   |   |   [7] PassengerId >= 548.5
+|   |   |   |   |   [8] PassengerId >= 740: 0.300 (n = 10, err = 2.1)
+|   |   |   |   |   [9] PassengerId < 740: 0.824 (n = 17, err = 2.5)
+|   |   [10] Age < 6.5: 0.765 (n = 17, err = 3.1)
+|   [11] Sex in female
+|   |   [12] Pclass >= 2.5
+|   |   |   [13] Fare >= 23.0875: 0.111 (n = 18, err = 1.8)
+|   |   |   [14] Fare < 23.0875
+|   |   |   |   [15] Age >= 16.5
+|   |   |   |   |   [16] PassengerId >= 399: 0.312 (n = 16, err = 3.4)
+|   |   |   |   |   [17] PassengerId < 399: 0.556 (n = 27, err = 6.7)
+|   |   |   |   [18] Age < 16.5: 0.842 (n = 19, err = 2.5)
+|   |   [19] Pclass < 2.5: 0.913 (n = 104, err = 8.2)
+
+Number of inner nodes:     9
+Number of terminal nodes: 10
+> plot(rparty.tree) 
+> 
+> confusionMatrix <- table(x = test$Survived, y = prediction, dnn=c("Actual", "Prediction"))
+> confusionMatrix
+      Prediction
+Actual   0   1
+     0 106  15
+     1  25  68
+> ##       Prediction
+> ## Actual   0   1
+> ##      0 117   7
+> ##      1  38  52
+> 
+> # 模型評估
+> pred <- predict(tree, newdata=test, type="class")
+> # 用table看預測的情況
+> table(real=test$Survived, predict=pred)
+    predict
+real   0   1
+   0 106  15
+   1  25  68
+> # 計算預測準確率 = 對角線的數量/總數量
+> confus.matrix <- table(real=test$Survived, predict=pred)
+> # 對角線的數量/總數量
+> sum(diag(confus.matrix))/sum(confus.matrix) 
+[1] 0.8130841
+> # 先觀察未修剪的樹，CP欄位代表樹的成本複雜度參數
+> printcp(tree) 
+
+Classification tree:
+rpart(formula = Survived ~ ., data = train, method = "class")
+
+Variables actually used in tree construction:
+[1] Age         Fare        PassengerId Pclass      Sex        
+
+Root node error: 197/500 = 0.394
+
+n= 500 
+
+        CP nsplit rel error  xerror     xstd
+1 0.416244      0   1.00000 1.00000 0.055463
+2 0.045685      1   0.58376 0.58376 0.047767
+3 0.035533      2   0.53807 0.62944 0.049018
+4 0.017766      4   0.46701 0.50761 0.045402
+5 0.015228      7   0.41117 0.49746 0.045058
+6 0.010000      9   0.38071 0.47208 0.044166
+> # 畫圖觀察未修剪的樹
+> plotcp(tree) 
+> # 利用能使決策樹具有最小誤差的CP來修剪樹
+> prunetree_cart.model <- prune(tree, cp = tree$cptable[which.min(tree$cptable[,"xerror"]),"CP"]) 
+> prunetree_pred <- predict(prunetree_cart.model, newdata=test, type="class")
+> # 用table看預測的情況
+> table(real=test$Survived, predict=prunetree_pred)
+    predict
+real   0   1
+   0 106  15
+   1  25  68
+> prunetree_confus.matrix <- table(real=test$Survived, predict=prunetree_pred)
+> sum(diag(prunetree_confus.matrix))/sum(prunetree_confus.matrix) # 對角線的數量/總數量
+[1] 0.8130841
+> 
+> require(caret)
+> require(e1071)
+> # 使用 10-fold cross validation
+> # 以及敘述性統計進行模型評估
+> train_control <- trainControl(method="cv", number=10)
+> train_control.model <- train(Survived~., data=train, method="rpart", trControl=train_control)
+警告訊息：
+1: 於 train.default(x, y, weights = w, ...)：
+  You are trying to do regression and your outcome only has two possible values Are you trying to do classification? If so, use a 2 level factor as your outcome column.
+2: 於 nominalTrainWorkflow(x = x, y = y, wts = weights, info = trainInfo, ：
+  There were missing values in resampled performance measures.
+> train_control.model
+CART 
+
+500 samples
+  8 predictor
+
+No pre-processing
+Resampling: Cross-Validated (10 fold) 
+Summary of sample sizes: 450, 450, 450, 450, 450, 450, ... 
+Resampling results across tuning parameters:
+
+  cp          RMSE       Rsquared   MAE      
+  0.04756285  0.4021190  0.3419287  0.3164251
+  0.07281648  0.4176102  0.2822464  0.3427761
+  0.26369046  0.4636987  0.1800930  0.4141563
+
+RMSE was used to select the optimal model using the smallest value.
+The final value used for the model was cp = 0.04756285.

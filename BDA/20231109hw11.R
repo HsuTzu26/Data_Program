@@ -1,0 +1,184 @@
+# 載入需要的套件
+#install.packages("magrittr")
+#install.packages("rpart")
+library(magrittr)
+library(rpart)
+# 讀取資料
+titanic <- read.csv("d:/rtemp/BDA/DATA/train.csv", header = TRUE)
+str(titanic)
+# 取 Survived存活與否, Pclass艙等/船票等級, Sex性別, 
+# Age年齡, Parch在船上之家族中的小孩數目 
+# Fare船票價格, Cabin床艙號碼
+
+# 刪除所有 NA 值 (using na.omit, return 刪除 NA 後的 vector)
+mytitanic <- titanic[, c(2, 3, 5, 6, 8, 10, 11)] %>% na.omit
+# 設立 factor和levels, 存活為1 level 1, 非存活為0 level 2
+mytitanic$Survived <- factor(mytitanic$Survived, levels = c(1, 0))
+str(mytitanic)
+
+# 建立決策樹模型
+# set random seed, 使每次隨機的資料都一致
+set.seed(123)
+# set treeModel, 存活+艙等+性別+年齡
+treeModel <- rpart(Survived ~ Pclass+Sex+Age, data = mytitanic, method = "class")
+# Accuracy 0.8165266
+
+# set treeModel, 存活+艙等+性別+年齡+在船上之家族中的小孩數目 
+treeModel <- rpart(Survived ~ Pclass+Sex+Age+Parch, data = mytitanic, method = "class")
+# Accuracy 0.8165266
+
+# set treeModel, 存活+艙等+性別+年齡+在船上之家族中的小孩數目 
+# + 船票價格
+treeModel <- rpart(Survived ~ Pclass+Sex+Age+Parch+Fare, data = mytitanic, method = "class")
+# Accuracy 0.8319328
+
+# set treeModel, 全取
+treeModel <- rpart(Survived ~ ., data = mytitanic, method = "class")
+# Accuracy 0.8809524
+
+### Conclusion ###
+# 全取後準確率最高的原因- 信息量廣, 樣本間具特徵相關性
+# Pclass 艙位等級通常與社會地位相關, 越高等級的艙等可能有更高的生存率
+# Sex 女性有較高的生存率, 因為救援通常優先考慮婦女和兒童
+# Age 兒童和老年人可能有更高的生存率
+# Parch 家庭單位大小會影響生存機會
+# Fare 船票價格和艙等有關, 越昂貴對映著高艙等, 即對應高生存率
+# Carbin 表示乘客所在的船艙, 船艙的逃生位置及機制會影響生存率
+
+
+titanicToBePredicted <- mytitanic[, -1]
+prediction <- predict(treeModel, newdata = titanicToBePredicted, type = "class")
+# 將混淆矩陣印出來
+confusionMatrix <- table(mytitanic$Survived, prediction, dnn = c("Actual", "Predicted"))
+confusionMatrix
+# 獲得TP, TN, FP, FN
+TP <- confusionMatrix[1, 1]
+TN <- confusionMatrix[2, 2]
+FP <- confusionMatrix[2, 1]
+FN <- confusionMatrix[1, 2]
+# 計算accuracy, TPR, FPR
+accuracy1 <- (TP + TN)/(TP + TN + FP + FN)
+# diag(confusionMatrix)- 提取 CM 的對角元素 (TP & TN)
+# sum(confusionMatrix)- 計算 CM 總和
+accuracy2 <- sum(diag(confusionMatrix))/sum(confusionMatrix)# 試試這樣算
+
+#敏感度 Sensitivity => recall
+# 在所有正樣本當中，能夠預測多少正樣本的比例
+# 也就是衡量模型中對 Positive 的檢測能力, 越高越能識別正樣本
+TPR <- TP/(TP + FN)
+TPR
+
+#特異度 Specificity 
+# 在所有負樣本當中，能夠預測多少負樣本的比例
+# 也就是衡量模型中對 Negative 的檢測能力, 越高越能排除負樣本
+TNR <- TN/(FP + TN)
+TNR
+
+#False Postive Rate
+FPR <- FP/(FP + TN)
+FPR
+#False Negative Rate
+FNR <- FN/(TP + FN)
+FNR
+
+# accuracy, TPR, FPR
+accuracy1
+accuracy2
+
+#-----------------------------------
+#packages <- c("rpart", "rattle", "rpart.plot", "RColorBrewer", "magrittr")
+
+# for (i in packages){
+#   install.packages(i)
+# }
+#install.packages(packages)
+sapply(packages, FUN = library, character.only = TRUE)
+# install.packages()
+# library()
+# 讀取資料
+titanic <- read.csv("d:/rtemp/BDA/DATA/train.csv", header = TRUE)
+titanic <- titanic[, -c(4, 9, 11)] %>% na.omit
+
+# magrittr 套件中最重要的功能就是 %>% 管線運算子，
+# 它的作用在於將左側的運算結果傳遞至右側函數的第一個參數
+# 請參考https://blog.gtwang.org/r/r-pipes-magrittr-package/
+str(titanic)
+# 取 titanic dataset 樣本數
+n<-nrow(titanic)
+# 隨機排列資料集
+set.seed(123) 
+#set a random seed, so that sample() results will be the same everytime.
+shuffledTitanic <- titanic[sample(n), ]   #sample: random select
+# 將資料集分為訓練與測試
+trainIndices <- 1:round(0.7 * n)
+train <- shuffledTitanic[trainIndices, ]
+testIndices <- (round(0.7 * n) + 1):n
+test <- shuffledTitanic[testIndices, ]
+
+# 建立一個決策樹模型
+tree <- rpart(formula = Survived ~ ., data = train, method = "class")
+prediction <- predict(tree, newdata = test, type="class")
+
+### fancyRpartPlot
+# 以明確的文字及鮮明的顏色標示出分類的依據
+# 比起其他的決策樹, 這種可視化呈現更容易解讀
+fancyRpartPlot(tree,cex=0.7)
+
+### plot and text
+# 最基礎的文字及決策樹可視化
+# 結果皆有顯示, 但分類上不太容易解讀
+plot(tree);text(tree)
+
+### prp
+# 比起最簡單的文字, 在可視化及結果顯示出了分類數量
+# 可以很直觀的得知分類結果為何
+library(rpart.plot)
+prp(tree,faclen=0,fallen.leaves=TRUE,shadow.col="gray",extra=2,cex = 1) 
+
+### partykit- rparty
+# 將分類結果使用量表方式呈現, 可以得知結果所佔的比率為何
+#寫法1
+library(partykit)
+plot(as.party(tree),cex = 0.8) 
+#寫法2
+require(partykit)   
+rparty.tree <- as.party(tree) # 轉換cart決策樹
+rparty.tree # 輸出各節點的細部資訊
+plot(rparty.tree) 
+
+confusionMatrix <- table(x = test$Survived, y = prediction, dnn=c("Actual", "Prediction"))
+confusionMatrix
+##       Prediction
+## Actual   0   1
+##      0 117   7
+##      1  38  52
+
+# 模型評估
+pred <- predict(tree, newdata=test, type="class")
+# 用table看預測的情況
+table(real=test$Survived, predict=pred)
+# 計算預測準確率 = 對角線的數量/總數量
+confus.matrix <- table(real=test$Survived, predict=pred)
+# 對角線的數量/總數量
+sum(diag(confus.matrix))/sum(confus.matrix) 
+# 先觀察未修剪的樹，CP欄位代表樹的成本複雜度參數
+printcp(tree) 
+# 畫圖觀察未修剪的樹
+plotcp(tree) 
+# 利用能使決策樹具有最小誤差的CP來修剪樹
+# CP- 成本複雜度參數
+prunetree_cart.model <- prune(tree, cp = tree$cptable[which.min(tree$cptable[,"xerror"]),"CP"]) 
+prunetree_pred <- predict(prunetree_cart.model, newdata=test, type="class")
+# 用table看預測的情況
+table(real=test$Survived, predict=prunetree_pred)
+prunetree_confus.matrix <- table(real=test$Survived, predict=prunetree_pred)
+# 對角線的數量/總數量
+sum(diag(prunetree_confus.matrix))/sum(prunetree_confus.matrix) 
+
+require(caret)
+require(e1071)
+# 使用 10-fold cross validation
+# 以及敘述性統計進行模型評估
+train_control <- trainControl(method="cv", number=10)
+train_control.model <- train(Survived~., data=train, method="rpart", trControl=train_control)
+train_control.model
